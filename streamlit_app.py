@@ -164,4 +164,4 @@ with col_ai_brain:
     
     if input_user:
         respons_ai = ai_chatbot_thinking(input_user, st.session_state["database_QC"], st.session_state["ai_knowledge_base"])
-        st.chat_message("assistant").write(respons_
+        st.chat_message("assistant").write(respons_ai)
