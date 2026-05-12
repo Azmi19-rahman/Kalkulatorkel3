@@ -4,7 +4,7 @@ import sqlite3
 
 # ==============================================================================
 # PROYEK: ISIS (INTEGRATED SMART INDUSTRIAL SYSTEM) WITH PERMANENT AI MEMORY
-# Cakupan Penuh: Bab I - VI + Database Fisik SQLite + Fitur Tambah Barang Baru
+# Versi 2.2: Sistem Auto-Fix Struktur Database + Cakupan Penuh Materi Bab I - VI
 # ==============================================================================
 
 st.set_page_config(page_title="Permanent AI Lab & Warehouse", page_icon="🧠", layout="wide")
@@ -12,48 +12,56 @@ st.set_page_config(page_title="Permanent AI Lab & Warehouse", page_icon="🧠", 
 DB_FILE = "isis_ai_memory.db"
 
 # ==============================================================================
-# 🗃️ FUNGSI DATABASE SQLITE (UNTUK INGATAN PERMANEN)
+# 🗃️ FUNGSI DATABASE SQLITE (DENGAN FITUR AUTO-FIX KOLOM KATEGORI)
 # ==============================================================================
 def init_db():
-    """Membuat file database dan tabel jika belum ada di laptop."""
+    """Membuat database dan otomatis memperbaiki struktur jika ada kolom yang kurang."""
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
-    # Tabel Gudang
+    
+    # 1. Membuat tabel-tabel utama jika belum ada
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS gudang (
-            id INTEGER PRIMARY KEY AUTOINCREMENT, nama TEXT UNIQUE, stok INTEGER, kategori TEXT
+            id INTEGER PRIMARY KEY AUTOINCREMENT, nama TEXT UNIQUE, stok INTEGER
         )
     """)
-    # Tabel Log Lab
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS lab_log (
             id_biner TEXT, sampel TEXT, parameter TEXT, nilai REAL, status TEXT
         )
     """)
-    # Tabel Memori AI
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS ai_knowledge (
             topik TEXT PRIMARY KEY, penjelasan TEXT
         )
     """)
     
-    # Isi data gudang awal jika tabel masih kosong
+    # 🔧 LOGIKA AUTO-FIX: Cek apakah kolom 'kategori' sudah ada di tabel gudang
+    cursor.execute("PRAGMA table_info(gudang)")
+    kolom_gudang = [info[1] for info in cursor.fetchall()]
+    
+    if "kategori" not in kolom_gudang:
+        # Jika kolom kategori belum ada (database versi lama), suntikkan kolom baru otomatis
+        cursor.execute("ALTER TABLE gudang ADD COLUMN kategori TEXT DEFAULT 'Alat Gelas'")
+        conn.commit()
+
+    # 2. Isi data gudang standar jika tabel masih kosong
     cursor.execute("SELECT COUNT(*) FROM gudang")
     if cursor.fetchone()[0] == 0:
         data_awal = [
-            (101, "Beaker Glass 250 mL", 45, "Alat Gelas"),
-            (102, "Labu Ukur 100 mL", 12, "Alat Gelas"),
-            (103, "Larutan Indikator PP", 8, "Bahan Kimia"),
-            (104, "Kertas Saring Whatman 41", 85, "Consumables"),
-            (105, "Buret 50 mL", 0, "Alat Gelas")
+            ("Beaker Glass 250 mL", 45, "Alat Gelas"),
+            ("Labu Ukur 100 mL", 12, "Alat Gelas"),
+            ("Larutan Indikator PP", 8, "Bahan Kimia"),
+            ("Kertas Saring Whatman 41", 85, "Consumables"),
+            ("Buret 50 mL", 0, "Alat Gelas")
         ]
-        cursor.executemany("INSERT INTO gudang (id, nama, stok, kategori) VALUES (?, ?, ?, ?)", data_awal)
+        cursor.executemany("INSERT INTO gudang (nama, stok, kategori) VALUES (?, ?, ?)", data_awal)
         
-    # Isi pengetahuan awal AI jika masih kosong
+    # 3. Isi pengetahuan awal AI jika masih kosong
     cursor.execute("SELECT COUNT(*) FROM ai_knowledge")
     if cursor.fetchone()[0] == 0:
         knowledge_awal = [
-            ("gravimetri", "Metode analisis kuantitatif berdasarkan pemisahan dan penimbangan berat konstan zat."),
+            ("gravimetri", "Metode analisis kuantitatif berdasarkan penimbangan berat konstan zat."),
             ("iod-hubl", "Penetapan bilangan iod untuk mengukur derajat ketidakjenuhan asam lemak/minyak."),
             ("glp", "Good Laboratory Practice - Standar organisasi laboratorium untuk menjamin mutu.")
         ]
@@ -62,10 +70,10 @@ def init_db():
     conn.commit()
     conn.close()
 
-# Jalankan inisialisasi database di awal program
+# Jalankan inisialisasi dan perbaikan otomatis database di awal program
 init_db()
 
-# --- FUNGSI DATABASES ---
+# --- FUNGSI QUERY DATABASE ---
 def get_gudang_data():
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
@@ -166,54 +174,4 @@ def ai_statistical_learning(data_baru):
     if len(data_sejenis) >= 3:
         rata_rata = np.mean(data_sejenis)
         std_dev = np.std(data_sejenis)
-        report_ai += f"📈 **Hasil Studi Database Fisik:** AI mengingat rata-rata nilai optimal masa lalu adalah **{rata_rata:.4f}**.\n"
-        if data_baru["status"] == "PASSED" and data_baru["nilai"] > (rata_rata + 1.5 * std_dev):
-            report_ai += "\n⚠️ **[AI ANOMALY DETECTION]:** AI mendeteksi anomali! Nilai sampel ini menyimpang dari pola historis harian."
-    else:
-        report_ai += "ℹ️ **[AI MEMORY]:** Kurang data historis permanen. AI butuh minimal 3 sampel tersimpan untuk membuat analisis prediktif."
-    return report_ai
-
-def ai_chatbot_brain(pertanyaan):
-    pertanyaan = pertanyaan.lower()
-    memori_pengetahuan = get_ai_knowledge()
-    database_lab = get_lab_logs()
-    
-    for kunci in memori_pengetahuan:
-        if kunci in pertanyaan:
-            return f"🤖 **[AI PERMANENT MEMORY]:** Saya ingat dari database, tentang *{kunci}* adalah: {memori_pengetahuan[kunci]}"
-            
-    if "rekap" in pertanyaan or "total" in pertanyaan:
-        if not database_lab: return "🤖 Database lab permanen kosong."
-        total = len(database_lab)
-        reject = sum(1 for d in database_lab if d["status"] == "REJECTED")
-        return f"🤖 **[AI DATABASE REPORT]:** Total riwayat yang pernah tercatat di harddisk adalah {total} pengujian, dengan {reject} sampel reject."
-        
-    return "🤖 Pola teks belum ada di database otak saya. Ajarkan saya di form bawah agar saya ingat selamanya!"
-
-
-# ==============================================================================
-# 💻 TAMPILAN FRONTEND WEB STREAMLIT
-# ==============================================================================
-st.title("🧠 ISIS v2.1: Integrated Smart Industrial System + Permanent AI")
-st.caption("Aplikasi Industri Modern - Menggunakan Database SQLite yang Aman dari Reset / Refresh")
-st.markdown("---")
-
-# Sidebar Batas Mutu Lab
-st.sidebar.header("⚙️ Batas Standar Mutu QC")
-air_max = st.sidebar.number_input("Maks Kadar Air (%)", value=0.1500, step=0.0100, format="%.4f")
-abu_max = st.sidebar.number_input("Maks Kadar Abu (%)", value=0.0500, step=0.0100, format="%.4f")
-iod_min = st.sidebar.number_input("Min Bilangan Iod", value=50.0000, step=1.0000, format="%.4f")
-
-tab_gudang, tab_kalkulator, tab_ai = st.tabs(["📦 1. Gudang & Tambah Barang Baru", "🧮 2. Lab & Analisis QC", "🧠 3. Otak AI & Knowledge"])
-
-# --- TAB 1: GUDANG TERINTEGRASI ---
-with tab_gudang:
-    st.header("📦 Kontrol Riil Inventaris Gudang")
-    gudang_aktif = get_gudang_data()
-    
-    col_g1, col_g2 = st.columns([1.5, 1.2])
-    with col_g1:
-        st.subheader("📋 Daftar Stok di Rak")
-        gudang_tampil = []
-        for b in gudang_aktif:
-            status = "🔴 HABIS" if b["stok"] == 0 else ("🟡 KRITIS" if b
+        report_ai += f"📈 **Hasil Studi Database Fisik:**
