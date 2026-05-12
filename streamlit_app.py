@@ -1,257 +1,167 @@
 import streamlit as st
-import random
+import numpy as np  # Membantu perhitungan statistik untuk proses belajar AI
 
 # ==============================================================================
-# APLIKASI WEB: INDUSTRIAL CHEMISTRY LAB SUITE (ICLS) WITH INTEGRATED AI
-# Berdasarkan Modul Logika & Pemrograman Komputer 2026 (Politeknik AKA Bogor)
-# Standar Penerapan: Good Laboratory Practice (GLP) & Smart Quality Control (QC)
+# APLIKASI WEB: ADAPTIVE AI CHEMISTRY LAB & WAREHOUSE SUITE
+# Mencakup Materi Modul Bab I - VI dengan Fitur Self-Learning & Dynamic Memory
 # ==============================================================================
 
-# --- BAB VI: PEMBUATAN FUNGSI (Perhitungan Kimia Analitik) ---
+# --- CONFIGURASI HALAMAN ---
+st.set_page_config(page_title="Self-Learning AI Lab", page_icon="🧠", layout="wide")
 
-def hitung_kadar_air(w0, w1, w2):
-    """Menghitung kadar air (%) metode Gravimetri Oven."""
-    try:
-        kadar_air = ((w1 - w2) / (w1 - w0)) * 100
-        return round(kadar_air, 4)
-    except ZeroDivisionError:
-        return None
+# --- MEMORI STATIS & DINAMIS AI (BAB V: SESSION STATE SEBAGAI MEMORI AI) ---
+if "database_QC" not in st.session_state:
+    st.session_state["database_QC"] = []
 
-def hitung_kadar_abu(w0, w1, w2):
-    """Menghitung kadar abu (%) metode Gravimetri Tanur."""
-    try:
-        kadar_abu = ((w2 - w0) / (w1 - w0)) * 100
-        return round(kadar_abu, 4)
-    except ZeroDivisionError:
-        return None
+# Memori Pengetahuan Baru (AI akan belajar instruksi baru dari sini)
+if "ai_knowledge_base" not in st.session_state:
+    st.session_state["ai_knowledge_base"] = {
+        "gravimetri": "Metode analisis berdasarkan penimbangan berat konstan setelah pemanasan.",
+        "iod-hubl": "Metode penentuan bilangan iod menggunakan reaksi adisi pada ikatan rangkap asam lemak."
+    }
 
-def hitung_iod_hubl(vol, norm, berat):
-    """Menghitung Bilangan Iod (Iodine Value) metode Iod-Hubl."""
-    try:
-        bilangan_iod = (vol * norm * 12.69) / berat
-        return round(bilangan_iod, 4)
-    except ZeroDivisionError:
-        return None
-
+# --- FUNGSIONALITAS DASAR MODUL (BAB I & VI) ---
 def desimal_ke_biner(desimal):
-    """--- BAB I: KONVERSI SISTEM BINER (Untuk Barcode ID Uji) ---"""
-    if desimal == 0:
-        return "0"
+    """Bab I: Sistem Biner untuk Barcode otomatis."""
+    if desimal == 0: return "0"
     biner = ""
     temp = desimal
     while temp > 0:
-        sisa = temp % 2
-        biner = str(sisa) + biner
+        biner = str(temp % 2) + biner
         temp = temp // 2
     return biner
 
+def hitung_kadar_air(w0, w1, w2):
+    try: return round(((w1 - w2) / (w1 - w0)) * 100, 4)
+    except ZeroDivisionError: return None
 
-# --- 🧠 LOGIKA AI INTEGRATED ---
 
-def ai_quality_assurance(parameter, nilai, status):
-    """AI Expert yang menganalisis hasil uji lab dan memberikan tindakan korektif."""
-    if status == "PASSED":
-        return f"✨ **[AI QA LOG]** Hasil uji untuk {parameter} berada dalam batas aman. Produk memenuhi spesifikasi dan siap rilis ke tahap berikutnya."
+# --- 🧠 LOGIKA SELF-LEARNING AI (KECERDASAN BUATAN ADAPTIF) ---
+
+def ai_analyze_and_learn(new_data, database):
+    """
+    AI Belajar Sendiri: Fungsi ini menganalisis tren data masa lalu di database
+    untuk merumuskan saran dan prediksi korektif secara dinamis.
+    """
+    # Memasukkan data baru ke memori log
+    database.append(new_data)
     
-    # Jika REJECTED, AI memberikan saran penyelesaian masalah laboratorium (Troubleshooting)
-    if parameter == "Kadar Air":
-        return ("⚠️ **[AI EVALUASI]** Kadar air terlalu tinggi! \n"
-                "**Analisis Penyebab AI:** Kemungkinan waktu pengeringan di oven kurang lama atau cawan belum mencapai berat konstan saat desikasi.\n"
-                "**Tindakan Korektif:** Lakukan pemanasan ulang pada suhu 105°C selama 1 jam sampai selisih berat < 0,0005 g.")
-    elif parameter == "Kadar Abu":
-        return ("⚠️ **[AI EVALUASI]** Kadar abu melebihi ambang batas industri!\n"
-                "**Analisis Penyebab AI:** Proses pemijaran di tanur kurang sempurna (masih ada sisa karbon hitam) atau sampel terkontaminasi debu luar.\n"
-                "**Tindakan Korektif:** Naikkan suhu tanur secara bertahap hingga 550°C sampai diperoleh abu berwarna putih abu-abu sempurna.")
-    elif parameter == "Iod-Hubl":
-        return ("⚠️ **[AI EVALUASI]** Bilangan Iod terlalu rendah!\n"
-                "**Analisis Penyebab AI:** Tingkat ketidakjenuhan minyak menurun akibat hidrogenasi atau minyak sudah mengalami ketengikan (oksidasi).\n"
-                "**Tindakan Korektif:** Periksa kondisi penyimpanan tangki produk dan pastikan tidak terpapar cahaya/udara luar secara langsung.")
-    return None
+    # AI mengambil semua nilai kadar air yang sukses (PASSED) untuk dipelajari
+    kadar_air_sukses = [d["nilai"] for d in database if d["parameter"] == "Kadar Air" and d["status"] == "PASSED"]
+    
+    insight = ""
+    if len(kadar_air_sukses) >= 3:
+        # AI menghitung rata-rata performa optimal berdasarkan data masa lalu
+        mean_optimal = np.mean(kadar_air_sukses)
+        insight = (f"🧠 **[AI SELF-LEARNING REPORT]:** Saya telah mempelajari {len(kadar_air_sukses)} sampel sukses terakhir. "
+                   f"Rata-rata kadar air terbaik produksi Anda sebenarnya adalah **{mean_optimal:.4f}%**. ")
+        
+        # AI membuat keputusan sendiri di luar aturan dasar jika mendeteksi anomali
+        if new_data["nilai"] > (mean_optimal * 1.5) and new_data["status"] == "PASSED":
+            insight += "\n⚠️ **[AI DETEKSI ANOMALI]:** Meskipun sampel ini 'Lolos' batas maksimum, nilainya jauh di atas rata-rata biasanya. AI menyarankan cek kondisi kelembaban ruang oven!"
+    else:
+        insight = "🧠 **[AI MEMORY]:** Saya sedang mengumpulkan dan mempelajari pola data sampel Anda. Butuh minimal 3 data sukses untuk mengaktifkan analisis prediktif."
+        
+    return insight
 
-def ai_lab_chatbot(pesan_user, database):
-    """🤖 Chatbot Asisten Lab yang mengevaluasi kondisi mutu keseluruhan harian."""
+def ai_chatbot_thinking(pesan_user, database, knowledge_base):
+    """AI Chatbot yang bisa membaca database dan memori pengetahuan yang baru dipelajarinya."""
     pesan_user = pesan_user.lower()
     
-    if "halo" in pesan_user or "hai" in pesan_user:
-        return "Halo! Saya AI Assistant Lab ICLS. Ada yang bisa saya bantu analisis hari ini?"
-        
-    elif "status" in pesan_user or "ringkasan" in pesan_user or "hasil" in pesan_user:
-        if not database:
-            return "Belum ada data pengujian yang saya catat di database hari ini. Silakan lakukan kalkulasi terlebih dahulu!"
-        
-        total_uji = len(database)
-        total_reject = sum(1 for item in database if item["status"] == "REJECTED")
-        
-        if total_reject > 0:
-            return f"Hari ini telah dilakukan {total_uji} pengujian. Deteksi AI menemukan {total_reject} sampel GAGAL (REJECTED). Anda bisa mengecek rekomendasi perbaikan pada panel analitis."
-        else:
-            return f"Laporan Bagus! Dari {total_uji} sampel yang diuji hari ini, semuanya berstatus PASSED. Pertahankan performa proses produksinya!"
+    # 1. Belajar dari interaksi basis pengetahuan dinamis
+    for kunci in knowledge_base:
+        if kunci in pesan_user:
+            return f"🤖 **[AI KNOWLEDGE]:** Mengenai *{kunci}*, ingatan saya mencatat: {knowledge_base[kunci]}"
             
-    elif "gravimetri" in pesan_user:
-        return "Analisis Gravimetri mencakup Kadar Air (oven) dan Kadar Abu (tanur). Pastikan penimbangan menggunakan neraca analitik dengan ketelitian 4 desimal untuk menjaga akurasi data industri."
+    # 2. Menganalisis kondisi database saat ini secara mandiri
+    if "rekap" in pesan_user or "kondisi" in pesan_user:
+        if not database: return "Database kosong. Saya belum punya data untuk dianalisis."
+        total = len(database)
+        reject = sum(1 for d in database if d["status"] == "REJECTED")
+        return f"🤖 **[AI DATA ANALYSIS]:** Dari total {total} sampel yang saya awasi, tingkat kegagalan produk saat ini adalah {((reject/total)*100):.1f}%. Perlu perhatian khusus pada sampel yang ditolak."
         
-    else:
-        respons_acak = [
-            "Maaf, saya belum memahami pertanyaan itu. Anda bisa bertanya seperti: 'bagaimana ringkasan hasil lab hari ini?'",
-            "Kata kunci tidak dikenali. Saya dilatih khusus untuk menganalisis data kadar air, kadar abu, dan bilangan Iod-Hubl.",
-            "Mohon perjelas pertanyaan Anda terkait teknis operasional lab atau status mutu sampel."
-        ]
-        return random.choice(respons_acak)
+    return "🤖 Saya belum memahami konteks tersebut. Tapi Anda bisa mengajarkan saya pengetahuan baru pada form di bawah!"
 
 
-# --- CONFIGURASI HALAMAN STREAMLIT ---
-st.set_page_config(
-    page_title="Industrial Lab with AI",
-    page_icon="🧪",
-    layout="wide"
-)
-
-# --- DATABASE LOG LAB (BAB V: LIST SESSION STATE) ---
-if "database_uji" not in st.session_state:
-    st.session_state["database_uji"] = []
-
-
-# --- TAMPILAN ANTARMUKA ---
-st.title("🧪 Industrial Chemistry Lab Suite + Smart AI")
-st.write("Kalkulator Analisis Mutu Laboratorium Berbasis AI - Standar Industri Modern (Industry 4.0).")
+# --- ANTARMUKA APLIKASI WEB ---
+st.title("🧠 Chemistry Lab Suite + Adaptive Self-Learning AI")
+st.write("Aplikasi laboratorium mandiri yang mampu mempelajari tren data dan menerima memori baru secara dinamis.")
 st.markdown("---")
 
-# Pengaturan Batas Toleransi Mutu oleh Supervisor di Sidebar (Bab III)
-st.sidebar.header("⚙️ Standar Kepatuhan Mutu (QC)")
-air_max = st.sidebar.number_input("Batas Maks Kadar Air (%)", value=0.1500, step=0.0100, format="%.4f")
-abu_max = st.sidebar.number_input("Batas Maks Kadar Abu (%)", value=0.0500, step=0.0100, format="%.4f")
-iod_min = st.sidebar.number_input("Batas Min Bilangan Iod", value=50.0000, step=1.0000, format="%.4f")
+# Batas Baku Mutu Awal (Default)
+BATAS_MAKS_AIR = 0.1500
 
-# Navigasi Aplikasi
-menu = st.selectbox(
-    "Pilih Parameter Analisis Laboratorium:",
-    [
-        "1. Analisis Kadar Air (Gravimetri Oven)",
-        "2. Analisis Kadar Abu (Gravimetri Tanur)",
-        "3. Penetapan Bilangan Iod (Metode Iod-Hubl)",
-        "4. Database Log QC & AI Global Analytics"
-    ]
-)
+col_kalkulator, col_ai_brain = st.columns([1.4, 1.2])
 
-# Pembagian Kolom Kerja Utama (Kiri untuk Input Kalkulator, Kanan untuk AI Assistant)
-col_input, col_ai_expert = st.columns([1.5, 1.2])
-
-# Variabel pembantu untuk memicu penampilan AI Evaluator
-tampilkan_ai_review = False
-prm_aktif, nilai_aktif, status_aktif = "", 0.0, ""
-
-# ------------------------------------------------------------------------------
-# PROSES INPUT & KALKULASI (BAB II, III, & VI)
-# ------------------------------------------------------------------------------
-with col_input:
-    if menu.startswith("1"):
-        st.header("💧 Kadar Air (Gravimetri Oven)")
-        nama_sampel = st.text_input("Kode Sampel:", value="SAM-WATER-001")
-        w0 = st.number_input("Berat cawan kosong konstan (g) [W0]:", value=15.1200, step=0.0001, format="%.4f")
-        w1 = st.number_input("Berat cawan + sampel awal (g) [W1]:", value=20.1250, step=0.0001, format="%.4f")
-        w2 = st.number_input("Berat cawan + sampel kering oven (g) [W2]:", value=20.1190, step=0.0001, format="%.4f")
-        
-        if st.button("Hitung Kadar Air", type="primary"):
-            if w1 <= w0 or w2 > w1:
-                st.error("Input Invalid! Periksa kembali data penimbangan Anda.")
-            else:
-                hasil = hitung_kadar_air(w0, w1, w2)
-                if hasil is not None:
-                    st.metric(label="Hasil Analisis", value=f"{hasil} %")
-                    status = "PASSED" if hasil <= air_max else "REJECTED"
-                    
-                    # Simpan ke DB
-                    id_biner = desimal_ke_biner(len(st.session_state["database_uji"]) + 101)
-                    st.session_state["database_uji"].append({
-                        "id_biner": id_biner, "sampel": nama_sampel, "parameter": "Kadar Air",
-                        "nilai": hasil, "satuan": "%", "status": status
-                    })
-                    # Set pemicu AI review
-                    tampilkan_ai_review, prm_aktif, nilai_aktif, status_aktif = True, "Kadar Air", hasil, status
-
-    elif menu.startswith("2"):
-        st.header("🔥 Kadar Abu (Gravimetri Tanur)")
-        nama_sampel = st.text_input("Kode Sampel:", value="SAM-ASH-001")
-        w0 = st.number_input("Berat cawan kosong konstan (g) [W0]:", value=20.5500, step=0.0001, format="%.4f")
-        w1 = st.number_input("Berat cawan + sampel awal (g) [W1]:", value=25.5550, step=0.0001, format="%.4f")
-        w2 = st.number_input("Berat cawan + abu sisa pijar (g) [W2]:", value=20.5520, step=0.0001, format="%.4f")
-        
-        if st.button("Hitung Kadar Abu", type="primary"):
-            if w1 <= w0 or w2 < w0:
-                st.error("Input Invalid! Periksa kembali data penimbangan Anda.")
-            else:
-                hasil = hitung_kadar_abu(w0, w1, w2)
-                if hasil is not None:
-                    st.metric(label="Hasil Analisis", value=f"{hasil} %")
-                    status = "PASSED" if hasil <= abu_max else "REJECTED"
-                    
-                    id_biner = desimal_ke_biner(len(st.session_state["database_uji"]) + 101)
-                    st.session_state["database_uji"].append({
-                        "id_biner": id_biner, "sampel": nama_sampel, "parameter": "Kadar Abu",
-                        "nilai": hasil, "satuan": "%", "status": status
-                    })
-                    tampilkan_ai_review, prm_aktif, nilai_aktif, status_aktif = True, "Kadar Abu", hasil, status
-
-    elif menu.startswith("3"):
-        st.header("🧪 Bilangan Iod (Metode Iod-Hubl)")
-        nama_sampel = st.text_input("Kode Sampel:", value="SAM-OIL-001")
-        vol = st.number_input("Volume Titrasi Na2S2O3 (mL):", value=15.50, step=0.05, format="%.2f")
-        norm = st.number_input("Normalitas Na2S2O3 (N):", value=0.1002, step=0.0001, format="%.4f")
-        berat = st.number_input("Berat Sampel Minyak (g):", value=0.4950, step=0.0001, format="%.4f")
-        
-        if st.button("Hitung Bilangan Iod", type="primary"):
-            if berat <= 0 or vol <= 0:
-                st.error("Input Invalid! Volume dan berat sampel harus bernilai positif.")
-            else:
-                hasil = hitung_iod_hubl(vol, norm, berat)
-                if hasil is not None:
-                    st.metric(label="Hasil Analisis", value=f"{hasil} g-I2/100g")
-                    status = "PASSED" if hasil >= iod_min else "REJECTED"
-                    
-                    id_biner = desimal_ke_biner(len(st.session_state["database_uji"]) + 101)
-                    st.session_state["database_uji"].append({
-                        "id_biner": id_biner, "sampel": nama_sampel, "parameter": "Iod-Hubl",
-                        "nilai": hasil, "satuan": "g-I2/100g", "status": status
-                    })
-                    tampilkan_ai_review, prm_aktif, nilai_aktif, status_aktif = True, "Iod-Hubl", hasil, status
-
-    elif menu.startswith("4"):
-        st.header("📊 Database Log & Global Analytics")
-        riwayat = st.session_state["database_uji"]
-        if not riwayat:
-            st.warning("Belum ada data pengujian laboratorium yang terekam.")
-        else:
-            st.table(riwayat)
-            if st.button("Hapus Semua Log"):
-                st.session_state["database_uji"] = []
-                st.rerun()
-
-# ------------------------------------------------------------------------------
-# PANEL DESENTRALISASI INTEGRASI AI (KOLOM KANAN)
-# ------------------------------------------------------------------------------
-with col_ai_expert:
-    st.subheader("🧠 AI Smart Lab Evaluator")
+# --- PANEL KIRI: OPERASI DAN KALKULASI ---
+with col_kalkulator:
+    st.header("💧 Input Pengujian Kadar Air (Gravimetri)")
+    nama_sampel = st.text_input("Kode Sampel Lab:", value="SMPL-CPO-01")
     
-    # Menampilkan Analisis Otomatis pasca-kalkulasi parameter aktif
-    if tampilkan_ai_review:
-        st.markdown(f"**Analisis Real-Time Terakhir:** `{prm_aktif}` = {nilai_aktif}")
-        if status_aktif == "PASSED":
-            st.success(f"Status Kepatuhan Mutu: {status_aktif}")
-        else:
-            st.error(f"Status Kepatuhan Mutu: {status_aktif}")
+    w0 = st.number_input("Berat cawan kosong konstan (g):", value=15.0000, step=0.0001, format="%.4f")
+    w1 = st.number_input("Berat cawan + sampel awal (g):", value=20.0000, step=0.0001, format="%.4f")
+    w2 = st.number_input("Berat cawan + sampel setelah oven (g):", value=19.9930, step=0.0001, format="%.4f")
+    
+    if st.button("Jalankan Kalkulasi & Kirim ke AI", type="primary"):
+        hasil_air = hitung_kadar_air(w0, w1, w2)
+        
+        if hasil_air is not None:
+            # Bab III: Kondisional penentuan status dasar
+            status_mutu = "PASSED" if hasil_air <= BATAS_MAKS_AIR else "REJECTED"
             
-        # Panggil fungsi AI QA Specialist
-        analisis_qa_ai = ai_quality_assurance(prm_aktif, nilai_aktif, status_aktif)
-        st.info(analisis_qa_ai)
+            # Membuat struktur data dict (Bab V)
+            id_uji = len(st.session_state["database_QC"]) + 101
+            data_baru = {
+                "id_biner": desimal_ke_biner(id_uji),
+                "sampel": nama_sampel,
+                "parameter": "Kadar Air",
+                "nilai": hasil_air,
+                "status": status_mutu
+            }
+            
+            # Memicu proses Belajar Mandiri AI
+            st.session_state["ai_report"] = ai_analyze_and_learn(data_baru, st.session_state["database_QC"])
+            st.success(f"Kalkulasi Selesai! Hasil: {hasil_air}% | Status Utama: {status_mutu}")
+            st.rerun()
+
+    st.markdown("---")
+    st.subheader("📋 Log Database yang Diarsip AI")
+    if st.session_state["database_QC"]:
+        st.table(st.session_state["database_QC"])
     else:
-        st.caption("Silakan lakukan perhitungan di panel kiri untuk memicu review otomatis dari AI QA Specialist.")
+        st.caption("Belum ada data sampel masuk.")
+
+# --- PANEL KANAN: OTAK AI & FITUR BELAJAR MANDIRI ---
+with col_ai_brain:
+    st.header("🧠 Pusat Pembelajaran Mandiri AI")
+    
+    # Menampilkan laporan hasil analisa belajar dari tren data
+    if "ai_report" in st.session_state:
+        st.info(st.session_state["ai_report"])
+    else:
+        st.caption("AI siap menganalisis. Masukkan beberapa data pengujian di sebelah kiri untuk melihat AI bekerja mempelajari pola.")
         
     st.markdown("---")
     
-    # Fitur Chatbot Asisten AI
-    st.markdown("### 💬 Chat dengan AI Asisten Lab:")
-    input_chat = st.text_input("Tanyakan sesuatu ke AI (Contoh: 'cek status lab hari ini' atau 'jelaskan gravimetri'):")
+    # Fitur Mengajari AI Secara Langsung (Pembaruan Knowledge Base Dinamis)
+    st.subheader("📖 Ajarkan Pengetahuan / SOP Baru ke AI")
+    topik_baru = st.text_input("Topik/Kata Kunci Baru (Misal: 'k3l' atau 'ruang oven'):").lower()
+    penjelasan_baru = st.text_area("Tulis Instruksi/SOP/Definisi yang Harus Diingat AI:")
     
-    if input_chat:
-        jawaban_chatbot = ai_lab_chatbot(input_chat, st.session_state["database_uji"])
-        st.chat_message("assistant").write(jawaban_chatbot)
+    if st.button("Suntikkan Pengetahuan ke Memori AI"):
+        if topik_baru and penjelasan_baru:
+            # AI memasukkan data kata kunci baru ke dalam library memorinya secara otomatis
+            st.session_state["ai_knowledge_base"][topik_baru] = penjelasan_baru
+            st.toast(f"AI Berhasil mempelajari hal baru tentang '{topik_baru}'!")
+        else:
+            st.error("Formulir mengajar AI tidak boleh kosong!")
+
+    st.markdown("---")
+    
+    # Chatbot Uji Coba Ingatan AI
+    st.subheader("💬 Uji Kecerdasan & Memori AI")
+    input_user = st.text_input("Tanya AI (Coba tanyakan topik baru yang sudah kamu ajarkan tadi):")
+    
+    if input_user:
+        respons_ai = ai_chatbot_thinking(input_user, st.session_state["database_QC"], st.session_state["ai_knowledge_base"])
+        st.chat_message("assistant").write(respons_
