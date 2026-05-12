@@ -1,18 +1,40 @@
 import streamlit as st
-
-import streamlit as st
-import random  # Digunakan untuk simulasi respons pintar AI
+import random
 
 # ==============================================================================
-# APLIKASI WEB: SMART WAREHOUSE INVENTORY MANAGEMENT WITH INTEGRATED AI
-# Sesuai Kurikulum Modul Logika & Pemrograman Komputer 2026 (Politeknik AKA Bogor)
-# Standar Penerapan: Industry 4.0 & AI Smart Lab Assistant
+# APLIKASI WEB: INDUSTRIAL CHEMISTRY LAB SUITE (ICLS) WITH INTEGRATED AI
+# Berdasarkan Modul Logika & Pemrograman Komputer 2026 (Politeknik AKA Bogor)
+# Standar Penerapan: Good Laboratory Practice (GLP) & Smart Quality Control (QC)
 # ==============================================================================
 
-# --- BAB VI: PEMBUATAN FUNGSI & LOGIKA AI ---
+# --- BAB VI: PEMBUATAN FUNGSI (Perhitungan Kimia Analitik) ---
+
+def hitung_kadar_air(w0, w1, w2):
+    """Menghitung kadar air (%) metode Gravimetri Oven."""
+    try:
+        kadar_air = ((w1 - w2) / (w1 - w0)) * 100
+        return round(kadar_air, 4)
+    except ZeroDivisionError:
+        return None
+
+def hitung_kadar_abu(w0, w1, w2):
+    """Menghitung kadar abu (%) metode Gravimetri Tanur."""
+    try:
+        kadar_abu = ((w2 - w0) / (w1 - w0)) * 100
+        return round(kadar_abu, 4)
+    except ZeroDivisionError:
+        return None
+
+def hitung_iod_hubl(vol, norm, berat):
+    """Menghitung Bilangan Iod (Iodine Value) metode Iod-Hubl."""
+    try:
+        bilangan_iod = (vol * norm * 12.69) / berat
+        return round(bilangan_iod, 4)
+    except ZeroDivisionError:
+        return None
 
 def desimal_ke_biner(desimal):
-    """--- BAB I: KONVERSI SISTEM BINER ---"""
+    """--- BAB I: KONVERSI SISTEM BINER (Untuk Barcode ID Uji) ---"""
     if desimal == 0:
         return "0"
     biner = ""
@@ -23,188 +45,213 @@ def desimal_ke_biner(desimal):
         temp = temp // 2
     return biner
 
-def ambil_barang_gudang(nama_barang, jumlah_diambil, database):
-    """Fungsi pengurangan stok otomatis (Validasi Bab III)."""
-    for barang in database:
-        if barang["nama"].lower() == nama_barang.lower():
-            if barang["stok"] == 0:
-                return False, f"Gagal! Stok '{barang['nama']}' sudah kosong (0)."
-            elif jumlah_diambil > barang["stok"]:
-                return False, f"Gagal! Sisa stok '{barang['nama']}' hanya {barang['stok']} unit."
-            else:
-                barang["stok"] -= jumlah_diambil
-                return True, f"Berhasil mengambil {jumlah_diambil} unit '{barang['nama']}'!"
-    return False, "Barang tidak ditemukan di gudang!"
 
-def ai_predictive_analysis(database):
-    """🧠 LOGIKA AI 1: Analisis Prediktif Stok Berdasarkan Pola Penggunaan Industri"""
-    rekomendasi_ai = []
-    for barang in database:
-        # AI mendeteksi jika stok di bawah ambang batas kritis
-        if barang["stok"] == 0:
-            rekomendasi_ai.append(f"🚨 **[AI URGENT]** Stok *{barang['nama']}* HABIS. AI memprediksi kelangkaan alat jika tidak di-order dalam 24 jam ke depan!")
-        elif barang["stok"] <= 15:
-            rekomendasi_ai.append(f"⚠️ **[AI WARNING]** Tren penggunaan *{barang['nama']}* meningkat. Disarankan melakukan restock sebanyak {int(barang['stok'] * 1.5)} unit.")
-    return rekomendasi_ai
+# --- 🧠 LOGIKA AI INTEGRATED ---
 
-def ai_chatbot_response(pesan_user, database):
-    """🤖 LOGIKA AI 2: Chatbot Asisten Gudang (Natural Language Rule Matching)"""
+def ai_quality_assurance(parameter, nilai, status):
+    """AI Expert yang menganalisis hasil uji lab dan memberikan tindakan korektif."""
+    if status == "PASSED":
+        return f"✨ **[AI QA LOG]** Hasil uji untuk {parameter} berada dalam batas aman. Produk memenuhi spesifikasi dan siap rilis ke tahap berikutnya."
+    
+    # Jika REJECTED, AI memberikan saran penyelesaian masalah laboratorium (Troubleshooting)
+    if parameter == "Kadar Air":
+        return ("⚠️ **[AI EVALUASI]** Kadar air terlalu tinggi! \n"
+                "**Analisis Penyebab AI:** Kemungkinan waktu pengeringan di oven kurang lama atau cawan belum mencapai berat konstan saat desikasi.\n"
+                "**Tindakan Korektif:** Lakukan pemanasan ulang pada suhu 105°C selama 1 jam sampai selisih berat < 0,0005 g.")
+    elif parameter == "Kadar Abu":
+        return ("⚠️ **[AI EVALUASI]** Kadar abu melebihi ambang batas industri!\n"
+                "**Analisis Penyebab AI:** Proses pemijaran di tanur kurang sempurna (masih ada sisa karbon hitam) atau sampel terkontaminasi debu luar.\n"
+                "**Tindakan Korektif:** Naikkan suhu tanur secara bertahap hingga 550°C sampai diperoleh abu berwarna putih abu-abu sempurna.")
+    elif parameter == "Iod-Hubl":
+        return ("⚠️ **[AI EVALUASI]** Bilangan Iod terlalu rendah!\n"
+                "**Analisis Penyebab AI:** Tingkat ketidakjenuhan minyak menurun akibat hidrogenasi atau minyak sudah mengalami ketengikan (oksidasi).\n"
+                "**Tindakan Korektif:** Periksa kondisi penyimpanan tangki produk dan pastikan tidak terpapar cahaya/udara luar secara langsung.")
+    return None
+
+def ai_lab_chatbot(pesan_user, database):
+    """🤖 Chatbot Asisten Lab yang mengevaluasi kondisi mutu keseluruhan harian."""
     pesan_user = pesan_user.lower()
     
-    # Deteksi intent/maksud dari pertanyaan user (Bab III: Kondisional)
     if "halo" in pesan_user or "hai" in pesan_user:
-        return "Halo! Saya AI Assistant Gudang AKA. Ada yang bisa saya bantu cek hari ini?"
+        return "Halo! Saya AI Assistant Lab ICLS. Ada yang bisa saya bantu analisis hari ini?"
         
-    elif "stok" in pesan_user or "habis" in pesan_user:
-        barang_habis = [b["nama"] for b in database if b["stok"] == 0]
-        if barang_habis:
-            return f"Berdasarkan analisis data saya, saat ini ada barang yang habis, yaitu: {', '.join(barang_habis)}. Segera hubungi bagian pengadaan ya!"
+    elif "status" in pesan_user or "ringkasan" in pesan_user or "hasil" in pesan_user:
+        if not database:
+            return "Belum ada data pengujian yang saya catat di database hari ini. Silakan lakukan kalkulasi terlebih dahulu!"
+        
+        total_uji = len(database)
+        total_reject = sum(1 for item in database if item["status"] == "REJECTED")
+        
+        if total_reject > 0:
+            return f"Hari ini telah dilakukan {total_uji} pengujian. Deteksi AI menemukan {total_reject} sampel GAGAL (REJECTED). Anda bisa mengecek rekomendasi perbaikan pada panel analitis."
         else:
-            return "Saya sudah memeriksa seluruh rak. Kabar baik, semua barang saat ini aman dan tersedia!"
+            return f"Laporan Bagus! Dari {total_uji} sampel yang diuji hari ini, semuanya berstatus PASSED. Pertahankan performa proses produksinya!"
             
-    elif "rekomendasi" in pesan_user or "saran" in pesan_user:
-        return "Saran saya: Prioritaskan pengadaan untuk barang berstatus 'KRITIS' atau 'HABIS' di dasbor sebelah kiri untuk menjaga kelancaran praktikum/produksi."
+    elif "gravimetri" in pesan_user:
+        return "Analisis Gravimetri mencakup Kadar Air (oven) dan Kadar Abu (tanur). Pastikan penimbangan menggunakan neraca analitik dengan ketelitian 4 desimal untuk menjaga akurasi data industri."
         
     else:
-        # Respons fallback jika AI tidak memahami teks spesifik
         respons_acak = [
-            "Maaf, bisa diperjelas pertanyaannya? Kamu bisa tanya saya tentang 'stok barang' atau 'rekomendasi gudang'.",
-            "Saya belum mendeteksi perintah tersebut. Pastikan kata kunci berkaitan dengan inventaris gudang.",
-            "Informasi spesifik tersebut tidak ditemukan dalam basis data log saya saat ini."
+            "Maaf, saya belum memahami pertanyaan itu. Anda bisa bertanya seperti: 'bagaimana ringkasan hasil lab hari ini?'",
+            "Kata kunci tidak dikenali. Saya dilatih khusus untuk menganalisis data kadar air, kadar abu, dan bilangan Iod-Hubl.",
+            "Mohon perjelas pertanyaan Anda terkait teknis operasional lab atau status mutu sampel."
         ]
         return random.choice(respons_acak)
 
 
-# --- KONFIGURASI HALAMAN STREAMLIT ---
+# --- CONFIGURASI HALAMAN STREAMLIT ---
 st.set_page_config(
-    page_title="Smart AI Warehouse",
-    page_icon="🤖",
+    page_title="Industrial Lab with AI",
+    page_icon="🧪",
     layout="wide"
 )
 
-# --- DATABASE GUDANG (IN-MEMORY SESSION STATE) ---
-if "gudang_db" not in st.session_state:
-    st.session_state["gudang_db"] = [
-        {"id": 101, "nama": "Beaker Glass 250 mL", "stok": 50, "kategori": "Alat Gelas"},
-        {"id": 102, "nama": "Labu Ukur 100 mL", "stok": 5, "kategori": "Alat Gelas"},  # Disetting kritis untuk uji AI
-        {"id": 103, "nama": "Larutan Indikator PP", "stok": 15, "kategori": "Bahan Kimia"},
-        {"id": 104, "nama": "Kertas Saring Whatman 41", "stok": 0, "kategori": "Consumables"}, # Disetting habis untuk uji AI
-        {"id": 105, "nama": "Buret 50 mL", "stok": 12, "kategori": "Alat Gelas"},
-    ]
-
-if "log_aktivitas" not in st.session_state:
-    st.session_state["log_aktivitas"] = []
+# --- DATABASE LOG LAB (BAB V: LIST SESSION STATE) ---
+if "database_uji" not in st.session_state:
+    st.session_state["database_uji"] = []
 
 
 # --- TAMPILAN ANTARMUKA ---
-st.title("📦 Smart AI Warehouse & Inventory System")
-st.write("Sistem Monitoring Stok Gudang Terintegrasi dengan Kecerdasan Buatan (AI) Analitis.")
+st.title("🧪 Industrial Chemistry Lab Suite + Smart AI")
+st.write("Kalkulator Analisis Mutu Laboratorium Berbasis AI - Standar Industri Modern (Industry 4.0).")
 st.markdown("---")
 
-db_aktif = st.session_state["gudang_db"]
+# Pengaturan Batas Toleransi Mutu oleh Supervisor di Sidebar (Bab III)
+st.sidebar.header("⚙️ Standar Kepatuhan Mutu (QC)")
+air_max = st.sidebar.number_input("Batas Maks Kadar Air (%)", value=0.1500, step=0.0100, format="%.4f")
+abu_max = st.sidebar.number_input("Batas Maks Kadar Abu (%)", value=0.0500, step=0.0100, format="%.4f")
+iod_min = st.sidebar.number_input("Batas Min Bilangan Iod", value=50.0000, step=1.0000, format="%.4f")
 
-# Layout Utama: 3 Kolom (Tabel Stok, Menu Transaksi, Fitur AI)
-col_tabel, col_transaksi, col_ai = st.columns([1.5, 1.2, 1.3])
+# Navigasi Aplikasi
+menu = st.selectbox(
+    "Pilih Parameter Analisis Laboratorium:",
+    [
+        "1. Analisis Kadar Air (Gravimetri Oven)",
+        "2. Analisis Kadar Abu (Gravimetri Tanur)",
+        "3. Penetapan Bilangan Iod (Metode Iod-Hubl)",
+        "4. Database Log QC & AI Global Analytics"
+    ]
+)
 
-# --- KOLOM 1: REAL-TIME STOK (BAB IV & V) ---
-with col_tabel:
-    st.subheader("📋 Real-Time Stok Gudang")
-    tampilan_tabel = []
-    for item in db_aktif:
-        kode_scan = desimal_ke_biner(item["id"])
-        if item["stok"] == 0:
-            status_stok = "🔴 HABIS"
-        elif item["stok"] <= 15:
-            status_stok = "🟡 KRITIS"
+# Pembagian Kolom Kerja Utama (Kiri untuk Input Kalkulator, Kanan untuk AI Assistant)
+col_input, col_ai_expert = st.columns([1.5, 1.2])
+
+# Variabel pembantu untuk memicu penampilan AI Evaluator
+tampilkan_ai_review = False
+prm_aktif, nilai_aktif, status_aktif = "", 0.0, ""
+
+# ------------------------------------------------------------------------------
+# PROSES INPUT & KALKULASI (BAB II, III, & VI)
+# ------------------------------------------------------------------------------
+with col_input:
+    if menu.startswith("1"):
+        st.header("💧 Kadar Air (Gravimetri Oven)")
+        nama_sampel = st.text_input("Kode Sampel:", value="SAM-WATER-001")
+        w0 = st.number_input("Berat cawan kosong konstan (g) [W0]:", value=15.1200, step=0.0001, format="%.4f")
+        w1 = st.number_input("Berat cawan + sampel awal (g) [W1]:", value=20.1250, step=0.0001, format="%.4f")
+        w2 = st.number_input("Berat cawan + sampel kering oven (g) [W2]:", value=20.1190, step=0.0001, format="%.4f")
+        
+        if st.button("Hitung Kadar Air", type="primary"):
+            if w1 <= w0 or w2 > w1:
+                st.error("Input Invalid! Periksa kembali data penimbangan Anda.")
+            else:
+                hasil = hitung_kadar_air(w0, w1, w2)
+                if hasil is not None:
+                    st.metric(label="Hasil Analisis", value=f"{hasil} %")
+                    status = "PASSED" if hasil <= air_max else "REJECTED"
+                    
+                    # Simpan ke DB
+                    id_biner = desimal_ke_biner(len(st.session_state["database_uji"]) + 101)
+                    st.session_state["database_uji"].append({
+                        "id_biner": id_biner, "sampel": nama_sampel, "parameter": "Kadar Air",
+                        "nilai": hasil, "satuan": "%", "status": status
+                    })
+                    # Set pemicu AI review
+                    tampilkan_ai_review, prm_aktif, nilai_aktif, status_aktif = True, "Kadar Air", hasil, status
+
+    elif menu.startswith("2"):
+        st.header("🔥 Kadar Abu (Gravimetri Tanur)")
+        nama_sampel = st.text_input("Kode Sampel:", value="SAM-ASH-001")
+        w0 = st.number_input("Berat cawan kosong konstan (g) [W0]:", value=20.5500, step=0.0001, format="%.4f")
+        w1 = st.number_input("Berat cawan + sampel awal (g) [W1]:", value=25.5550, step=0.0001, format="%.4f")
+        w2 = st.number_input("Berat cawan + abu sisa pijar (g) [W2]:", value=20.5520, step=0.0001, format="%.4f")
+        
+        if st.button("Hitung Kadar Abu", type="primary"):
+            if w1 <= w0 or w2 < w0:
+                st.error("Input Invalid! Periksa kembali data penimbangan Anda.")
+            else:
+                hasil = hitung_kadar_abu(w0, w1, w2)
+                if hasil is not None:
+                    st.metric(label="Hasil Analisis", value=f"{hasil} %")
+                    status = "PASSED" if hasil <= abu_max else "REJECTED"
+                    
+                    id_biner = desimal_ke_biner(len(st.session_state["database_uji"]) + 101)
+                    st.session_state["database_uji"].append({
+                        "id_biner": id_biner, "sampel": nama_sampel, "parameter": "Kadar Abu",
+                        "nilai": hasil, "satuan": "%", "status": status
+                    })
+                    tampilkan_ai_review, prm_aktif, nilai_aktif, status_aktif = True, "Kadar Abu", hasil, status
+
+    elif menu.startswith("3"):
+        st.header("🧪 Bilangan Iod (Metode Iod-Hubl)")
+        nama_sampel = st.text_input("Kode Sampel:", value="SAM-OIL-001")
+        vol = st.number_input("Volume Titrasi Na2S2O3 (mL):", value=15.50, step=0.05, format="%.2f")
+        norm = st.number_input("Normalitas Na2S2O3 (N):", value=0.1002, step=0.0001, format="%.4f")
+        berat = st.number_input("Berat Sampel Minyak (g):", value=0.4950, step=0.0001, format="%.4f")
+        
+        if st.button("Hitung Bilangan Iod", type="primary"):
+            if berat <= 0 or vol <= 0:
+                st.error("Input Invalid! Volume dan berat sampel harus bernilai positif.")
+            else:
+                hasil = hitung_iod_hubl(vol, norm, berat)
+                if hasil is not None:
+                    st.metric(label="Hasil Analisis", value=f"{hasil} g-I2/100g")
+                    status = "PASSED" if hasil >= iod_min else "REJECTED"
+                    
+                    id_biner = desimal_ke_biner(len(st.session_state["database_uji"]) + 101)
+                    st.session_state["database_uji"].append({
+                        "id_biner": id_biner, "sampel": nama_sampel, "parameter": "Iod-Hubl",
+                        "nilai": hasil, "satuan": "g-I2/100g", "status": status
+                    })
+                    tampilkan_ai_review, prm_aktif, nilai_aktif, status_aktif = True, "Iod-Hubl", hasil, status
+
+    elif menu.startswith("4"):
+        st.header("📊 Database Log & Global Analytics")
+        riwayat = st.session_state["database_uji"]
+        if not riwayat:
+            st.warning("Belum ada data pengujian laboratorium yang terekam.")
         else:
-            status_stok = "🟢 AMAN"
-            
-        tampilan_tabel.append({
-            "Scan Code (Biner)": kode_scan,
-            "Nama Barang": item["nama"],
-            "Stok": item["stok"],
-            "Status": status_stok
-        })
-    st.table(tampilan_tabel)
-
-
-# --- KOLOM 2: MENU TRANSAKSI (BAB II & III) ---
-with col_transaksi:
-    st.subheader("🔄 Menu Ambil & Tambah Barang")
-    daftar_nama_barang = [item["nama"] for item in db_aktif]
-    
-    # Form Pengambilan
-    barang_pilihan = st.selectbox("Pilih Barang yang Diambil:", daftar_nama_barang, key="ambil")
-    jumlah_ambil = st.number_input("Jumlah Ambil (unit):", min_value=1, step=1, value=1)
-    
-    if st.button("Keluarkan Barang", type="primary"):
-        sukses, pesan = ambil_barang_gudang(barang_pilihan, jumlah_ambil, db_aktif)
-        if sukses:
-            st.success(pesan)
-            st.session_state["log_aktivitas"].append(f"🟢 [AMBIL] {jumlah_ambil} unit '{barang_pilihan}'")
-            st.rerun()
-        else:
-            st.error(pesan)
-
-    st.markdown("---")
-    
-    # Form Restock
-    barang_restock = st.selectbox("Pilih Barang untuk Ditambah:", daftar_nama_barang, key="tambah")
-    jumlah_tambah = st.number_input("Jumlah Tambah (unit):", min_value=1, step=1, value=5)
-    if st.button("Tambah Stok", type="secondary"):
-        for b in db_aktif:
-            if b["nama"] == barang_restock:
-                b["stok"] += jumlah_tambah
-                st.success(f"Berhasil ditambah {jumlah_tambah} unit!")
-                st.session_state["log_aktivitas"].append(f"🔵 [RESTOCK] Ditambah {jumlah_tambah} unit '{barang_restock}'")
+            st.table(riwayat)
+            if st.button("Hapus Semua Log"):
+                st.session_state["database_uji"] = []
                 st.rerun()
 
-
-# --- KOLOM 3: INTEGRASI AI (FITUR BARU) ---
-with col_ai:
-    st.subheader("🧠 Dasbor AI Smart Assistant")
+# ------------------------------------------------------------------------------
+# PANEL DESENTRALISASI INTEGRASI AI (KOLOM KANAN)
+# ------------------------------------------------------------------------------
+with col_ai_expert:
+    st.subheader("🧠 AI Smart Lab Evaluator")
     
-    # Sub-Fitur 1: Hasil Prediksi Otomatis Machine Learning Palsu (Analitis)
-    st.markdown("### 📊 AI Predictive Insights:")
-    notifikasi_ai = ai_predictive_analysis(db_aktif)
-    if notifikasi_ai:
-        for alert in notifikasi_ai:
-            st.write(alert)
+    # Menampilkan Analisis Otomatis pasca-kalkulasi parameter aktif
+    if tampilkan_ai_review:
+        st.markdown(f"**Analisis Real-Time Terakhir:** `{prm_aktif}` = {nilai_aktif}")
+        if status_aktif == "PASSED":
+            st.success(f"Status Kepatuhan Mutu: {status_aktif}")
+        else:
+            st.error(f"Status Kepatuhan Mutu: {status_aktif}")
+            
+        # Panggil fungsi AI QA Specialist
+        analisis_qa_ai = ai_quality_assurance(prm_aktif, nilai_aktif, status_aktif)
+        st.info(analisis_qa_ai)
     else:
-        st.success("🎯 **[AI REPORT]** Kondisi suplai gudang dinilai sangat optimal untuk 7 hari ke depan.")
+        st.caption("Silakan lakukan perhitungan di panel kiri untuk memicu review otomatis dari AI QA Specialist.")
         
     st.markdown("---")
     
-    # Sub-Fitur 2: Chatbot Interaktif Penjawab Otomatis
-    st.markdown("### 💬 Chat dengan AI Gudang:")
-    input_user = st.text_input("Tanyakan sesuatu ke AI (Contoh: 'cek barang habis' atau 'minta rekomendasi'):")
+    # Fitur Chatbot Asisten AI
+    st.markdown("### 💬 Chat dengan AI Asisten Lab:")
+    input_chat = st.text_input("Tanyakan sesuatu ke AI (Contoh: 'cek status lab hari ini' atau 'jelaskan gravimetri'):")
     
-    if input_user:
-        respons = ai_chatbot_response(input_user, db_aktif)
-        st.chat_message("assistant").write(respons)
-
-st.markdown("---")
-
-# Bagian Paling Bawah: Operasi Himpunan & Log Aktivitas (Bab V)
-col_bawah_1, col_bawah_2 = st.columns(2)
-
-with col_bawah_1:
-    st.subheader("⚠️ Manajemen Kontrol Set")
-    set_barang_habis = {b["nama"] for b in db_aktif if b["stok"] == 0}
-    set_barang_kritis = {b["nama"] for b in db_aktif if 0 < b["stok"] <= 15}
-    
-    col_sub1, col_sub2 = st.columns(2)
-    with col_sub1:
-        st.error("❌ Set Barang Habis:")
-        st.write(set_barang_habis if set_barang_habis else "Kosong")
-    with col_sub2:
-        st.warning("⚠️ Set Barang Kritis:")
-        st.write(set_barang_kritis if set_barang_kritis else "Kosong")
-
-with col_bawah_2:
-    st.subheader("📜 Log Aktivitas Gudang")
-    if st.session_state["log_aktivitas"]:
-        for log in reversed(st.session_state["log_aktivitas"]):
-            st.text(log)
-    else:
-        st.caption("Belum ada aktivitas hari ini.")
+    if input_chat:
+        jawaban_chatbot = ai_lab_chatbot(input_chat, st.session_state["database_uji"])
+        st.chat_message("assistant").write(jawaban_chatbot)
