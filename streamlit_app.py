@@ -174,4 +174,188 @@ def ai_statistical_learning(data_baru):
     if len(data_sejenis) >= 3:
         rata_rata = np.mean(data_sejenis)
         std_dev = np.std(data_sejenis)
-        report_ai += f"📈 **Hasil Studi Database Fisik:**
+        report_ai += f"📈 **Hasil Studi Database Fisik:** AI mengingat rata-rata nilai optimal masa lalu adalah **{rata_rata:.4f}**.\n"
+        if data_baru["status"] == "PASSED" and data_baru["nilai"] > (rata_rata + 1.5 * std_dev):
+            report_ai += "\n⚠️ **[AI ANOMALY DETECTION]:** AI mendeteksi anomali! Nilai sampel ini menyimpang dari pola historis harian."
+    else:
+        report_ai += "ℹ️ **[AI MEMORY]:** Kurang data historis permanen. AI butuh minimal 3 sampel tersimpan untuk membuat analisis prediktif."
+    return report_ai
+
+def ai_chatbot_brain(pertanyaan):
+    pertanyaan = pertanyaan.lower()
+    memori_pengetahuan = get_ai_knowledge()
+    database_lab = get_lab_logs()
+    
+    for kunci in memori_pengetahuan:
+        if kunci in pertanyaan:
+            return f"🤖 **[AI PERMANENT MEMORY]:** Saya ingat dari database, tentang *{kunci}* adalah: {memori_pengetahuan[kunci]}"
+            
+    if "rekap" in pertanyaan or "total" in pertanyaan:
+        if not database_lab: return "🤖 Database lab permanen kosong."
+        total = len(database_lab)
+        reject = sum(1 for d in database_lab if d["status"] == "REJECTED")
+        return f"🤖 **[AI DATABASE REPORT]:** Total riwayat yang pernah tercatat di harddisk adalah {total} pengujian, dengan {reject} sampel reject."
+        
+    return "🤖 Pola teks belum ada di database otak saya. Ajarkan saya di form bawah agar saya ingat selamanya!"
+
+
+# ==============================================================================
+# 💻 TAMPILAN FRONTEND WEB STREAMLIT
+# ==============================================================================
+st.title("🧠 ISIS v2.2: Integrated Smart Industrial System + Permanent AI")
+st.caption("Aplikasi Industri Modern - Dilengkapi Auto-Fix Database Struktur Anti-Error")
+st.markdown("---")
+
+# Sidebar Batas Mutu Lab
+st.sidebar.header("⚙️ Batas Standar Mutu QC")
+air_max = st.sidebar.number_input("Maks Kadar Air (%)", value=0.1500, step=0.0100, format="%.4f")
+abu_max = st.sidebar.number_input("Maks Kadar Abu (%)", value=0.0500, step=0.0100, format="%.4f")
+iod_min = st.sidebar.number_input("Min Bilangan Iod", value=50.0000, step=1.0000, format="%.4f")
+
+tab_gudang, tab_kalkulator, tab_ai = st.tabs(["📦 1. Gudang & Tambah Barang Baru", "🧮 2. Lab & Analisis QC", "🧠 3. Otak AI & Knowledge"])
+
+# --- TAB 1: GUDANG TERINTEGRASI ---
+with tab_gudang:
+    st.header("📦 Kontrol Riil Inventaris Gudang")
+    gudang_aktif = get_gudang_data()
+    
+    col_g1, col_g2 = st.columns([1.5, 1.2])
+    with col_g1:
+        st.subheader("📋 Daftar Stok di Rak")
+        gudang_tampil = []
+        for b in gudang_aktif:
+            status = "🔴 HABIS" if b["stok"] == 0 else ("🟡 KRITIS" if b["stok"] <= 15 else "🟢 AMAN")
+            gudang_tampil.append({
+                "Code (Biner)": desimal_ke_biner(b["id"]), 
+                "Nama Barang": b["nama"], 
+                "Kategori": b["kategori"], 
+                "Stok": b["stok"], 
+                "Status": status
+            })
+        st.table(gudang_tampil)
+        
+    with col_g2:
+        # Form Tambah Barang Baru
+        st.subheader("📥 Tambah Barang Baru (Belum Ada di Rak)")
+        with st.form("form_barang_baru"):
+            nama_baru = st.text_input("Nama Barang/Alat Baru:")
+            stok_awal = st.number_input("Jumlah Stok Masuk Awal:", min_value=1, step=1, value=10)
+            kategori_baru = st.selectbox("Kategori Barang:", ["Alat Gelas", "Bahan Kimia", "Consumables", "Instrumen"])
+            submit_baru = st.form_submit_button("Suntik ke Gudang")
+            
+            if submit_baru:
+                if nama_baru.strip() == "":
+                    st.error("Nama barang tidak boleh kosong!")
+                else:
+                    sukses, pesan = tambah_barang_baru_db(nama_baru.strip(), stok_awal, kategori_baru)
+                    if sukses:
+                        st.success(pesan)
+                        st.grid = st.rerun()
+                    else:
+                        st.error(pesan)
+                        
+        st.markdown("---")
+        
+        # Menu Ambil Barang
+        st.subheader("🔄 Pengeluaran Barang (Ambil)")
+        list_nama = [b["nama"] for b in gudang_aktif]
+        pilih_b = st.selectbox("Pilih Barang:", list_nama)
+        jml_ambil = st.number_input("Jumlah Ambil:", min_value=1, step=1)
+        
+        if st.button("Ambil Barang", type="primary"):
+            for b in gudang_aktif:
+                if b["nama"] == pilih_b:
+                    if b["stok"] >= jml_ambil:
+                        update_stok_gudang(pilih_b, b["stok"] - jml_ambil)
+                        st.success("Berhasil! Stok otomatis berkurang di database.")
+                        st.grid = st.rerun()
+                    else: 
+                        st.error("Stok tidak mencukupi!")
+
+# --- TAB 2: KALKULATOR ANALISIS QC ---
+with tab_kalkulator:
+    st.header("🧮 Laboratorium QC")
+    sub_lab = st.selectbox("Metode Parameter:", ["Kadar Air (Oven)", "Kadar Abu (Tanur)", "Bilangan Iod (Iod-Hubl)"])
+    col_l1, col_l2 = st.columns([1.4, 1.2])
+    
+    with col_l1:
+        nama_smpl = st.text_input("Kode Sampel:", value="SMPL-01")
+        if "Air" in sub_lab:
+            w0 = st.number_input("W0 (g):", value=15.0000, format="%.4f")
+            w1 = st.number_input("W1 (g):", value=20.0000, format="%.4f")
+            w2 = st.number_input("W2 (g):", value=19.9920, format="%.4f")
+            if st.button("Hitung & Tulis ke Database Harddisk"):
+                hasil = hitung_kadar_air(w0, w1, w2)
+                status = "PASSED" if hasil <= air_max else "REJECTED"
+                biner = desimal_ke_biner(len(get_lab_logs()) + 1)
+                save_lab_log(biner, nama_smpl, "Kadar Air", hasil, status)
+                st.session_state["ai_persistent_rep"] = ai_statistical_learning({"id_biner": biner, "parameter": "Kadar Air", "nilai": hasil, "status": status})
+                st.grid = st.rerun()
+                
+        elif "Abu" in sub_lab:
+            w0 = st.number_input("W0 (g):", value=20.0000, format="%.4f")
+            w1 = st.number_input("W1 (g):", value=25.0000, format="%.4f")
+            w2 = st.number_input("W2 (g):", value=20.0020, format="%.4f")
+            if st.button("Hitung & Tulis ke Database Harddisk"):
+                hasil = hitung_kadar_abu(w0, w1, w2)
+                status = "PASSED" if hasil <= abu_max else "REJECTED"
+                biner = desimal_ke_biner(len(get_lab_logs()) + 1)
+                save_lab_log(biner, nama_smpl, "Kadar Abu", hasil, status)
+                st.session_state["ai_persistent_rep"] = ai_statistical_learning({"id_biner": biner, "parameter": "Kadar Abu", "nilai": hasil, "status": status})
+                st.grid = st.rerun()
+
+        elif "Iod" in sub_lab:
+            vol = st.number_input("Volume (mL):", value=14.00, format="%.2f")
+            norm = st.number_input("Normalitas (N):", value=0.1000, format="%.4f")
+            berat = st.number_input("Berat Minyak (g):", value=0.5000, format="%.4f")
+            if st.button("Hitung & Tulis ke Database Harddisk"):
+                hasil = hitung_iod_hubl(vol, norm, berat)
+                status = "PASSED" if hasil >= iod_min else "REJECTED"
+                biner = desimal_ke_biner(len(get_lab_logs()) + 1)
+                save_lab_log(biner, nama_smpl, "Iod-Hubl", hasil, status)
+                st.session_state["ai_persistent_rep"] = ai_statistical_learning({"id_biner": biner, "parameter": "Iod-Hubl", "nilai": hasil, "status": status})
+                st.grid = st.rerun()
+
+    with col_l2:
+        st.subheader("🧐 Evaluasi Otak AI Permanen")
+        if "ai_persistent_rep" in st.session_state: st.info(st.session_state["ai_persistent_rep"])
+        else: st.caption("Lakukan kalkulasi untuk memicu analisis database oleh AI.")
+
+    st.markdown("---")
+    st.subheader("📋 Seluruh Riwayat yang Tersimpan di Harddisk Laptop")
+    logs_tersimpan = get_lab_logs()
+    if logs_tersimpan:
+        st.table(logs_tersimpan)
+        
+        # Operasi Set (Bab V)
+        set_semua = {d["sampel"] for d in logs_tersimpan}
+        set_reject = {d["sampel"] for d in logs_tersimpan if d["status"] == "REJECTED"}
+        st.write(f"🔴 **Set Produk Gagal (Tersimpan Fisik):** {set_reject if set_reject else 'Tidak ada'}")
+        st.write(f"🟢 **Set Produk Lolos Sempurna:** {set_semua.difference(set_reject) if set_semua.difference(set_reject) else 'Tidak ada'}")
+        
+        if st.button("Format/Hapus Seluruh Database Log Lab"):
+            clear_lab_logs(); st.grid = st.rerun()
+    else: st.caption("Belum ada data pengujian fisik di harddisk.")
+
+# --- TAB 3: OTAK AI & PEMBELAJARAN ---
+with tab_ai:
+    st.header("🧠 Long-Term Memory AI")
+    col_a1, col_a2 = st.columns(2)
+    
+    with col_a1:
+        st.subheader("📖 Ajarkan SOP/Aturan Baru Selamanya")
+        topik = st.text_input("Topik Baru:").lower().strip()
+        penjelasan = st.text_area("Penjelasan/Instruksi SOP:")
+        if st.button("Suntikkan ke Memori Jangka Panjang AI"):
+            if topik and penjelasan:
+                save_ai_knowledge(topik, penjelasan)
+                st.toast("AI berhasil mencatatnya ke dalam sel memori permanen!"); st.grid = st.rerun()
+                
+        st.subheader("📚 Isi Otak AI di Harddisk Saat Ini")
+        st.json(get_ai_knowledge())
+
+    with col_a2:
+        st.subheader("💬 Tes Ingatan AI Pasca Web Ditutup")
+        chat_in = st.text_input("Tanya AI:")
+        if chat_in:
+            st.chat_message("assistant").write(ai_chatbot_brain(chat_in))
