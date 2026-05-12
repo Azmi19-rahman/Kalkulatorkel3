@@ -4,7 +4,7 @@ import sqlite3
 
 # ==============================================================================
 # PROYEK: ISIS (INTEGRATED SMART INDUSTRIAL SYSTEM) WITH PERMANENT AI MEMORY
-# Versi 2.3: Perbaikan Bug Typo st.grid & Cakupan Penuh Materi Bab I - VI
+# Versi 2.4: Fitur Mutasi Stok Tunggal (Masuk/Keluar Terintegrasi) - Bebas Bug
 # ==============================================================================
 
 st.set_page_config(page_title="Permanent AI Lab & Warehouse", page_icon="🧠", layout="wide")
@@ -12,17 +12,20 @@ st.set_page_config(page_title="Permanent AI Lab & Warehouse", page_icon="🧠", 
 DB_FILE = "isis_ai_memory.db"
 
 # ==============================================================================
-# 🗃️ FUNGSI DATABASE SQLITE (DENGAN FITUR AUTO-FIX KOLOM KATEGORI)
+# 🗃️ FUNGSI DATABASE SQLITE (BERSIH & AMAN)
 # ==============================================================================
 def init_db():
-    """Membuat database dan otomatis memperbaiki struktur jika ada kolom yang kurang."""
+    """Membuat database baru dengan struktur bersih jika terjadi error batasan."""
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     
-    # 1. Membuat tabel-tabel utama jika belum ada
+    # Membuat tabel-tabel utama
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS gudang (
-            id INTEGER PRIMARY KEY AUTOINCREMENT, nama TEXT UNIQUE, stok INTEGER
+            id INTEGER PRIMARY KEY AUTOINCREMENT, 
+            nama TEXT UNIQUE, 
+            stok INTEGER, 
+            kategori TEXT
         )
     """)
     cursor.execute("""
@@ -36,15 +39,7 @@ def init_db():
         )
     """)
     
-    # 🔧 LOGIKA AUTO-FIX: Cek apakah kolom 'kategori' sudah ada di tabel gudang
-    cursor.execute("PRAGMA table_info(gudang)")
-    kolom_gudang = [info[1] for info in cursor.fetchall()]
-    
-    if "kategori" not in kolom_gudang:
-        cursor.execute("ALTER TABLE gudang ADD COLUMN kategori TEXT DEFAULT 'Alat Gelas'")
-        conn.commit()
-
-    # 2. Isi data gudang standar jika tabel masih kosong
+    # Mengisi data awal standar jika tabel gudang kosong
     cursor.execute("SELECT COUNT(*) FROM gudang")
     if cursor.fetchone()[0] == 0:
         data_awal = [
@@ -54,9 +49,9 @@ def init_db():
             ("Kertas Saring Whatman 41", 85, "Consumables"),
             ("Buret 50 mL", 0, "Alat Gelas")
         ]
-        cursor.executemany("INSERT INTO gudang (nama, stok, kategori) VALUES (?, ?, ?)", data_awal)
+        cursor.executemany("INSERT OR IGNORE INTO gudang (nama, stok, kategori) VALUES (?, ?, ?)", data_awal)
         
-    # 3. Isi pengetahuan awal AI jika masih kosong
+    # Mengisi pengetahuan awal AI jika kosong
     cursor.execute("SELECT COUNT(*) FROM ai_knowledge")
     if cursor.fetchone()[0] == 0:
         knowledge_awal = [
@@ -64,12 +59,12 @@ def init_db():
             ("iod-hubl", "Penetapan bilangan iod untuk mengukur derajat ketidakjenuhan asam lemak/minyak."),
             ("glp", "Good Laboratory Practice - Standar organisasi laboratorium untuk menjamin mutu.")
         ]
-        cursor.executemany("INSERT INTO ai_knowledge VALUES (?, ?)", knowledge_awal)
+        cursor.executemany("INSERT OR IGNORE INTO ai_knowledge VALUES (?, ?)", knowledge_awal)
         
     conn.commit()
     conn.close()
 
-# Jalankan inisialisasi database di awal program
+# Jalankan inisialisasi database
 init_db()
 
 # --- FUNGSI QUERY DATABASE ---
@@ -81,21 +76,10 @@ def get_gudang_data():
     conn.close()
     return [{"id": r[0], "nama": r[1], "stok": r[2], "kategori": r[3]} for r in rows]
 
-def tambah_barang_baru_db(nama, stok, kategori):
-    try:
-        conn = sqlite3.connect(DB_FILE)
-        cursor = conn.cursor()
-        cursor.execute("INSERT INTO gudang (nama, stok, kategori) VALUES (?, ?, ?)", (nama, stok, kategori))
-        conn.commit()
-        conn.close()
-        return True, f"Berhasil menambahkan '{nama}' sebagai barang baru di gudang!"
-    except sqlite3.IntegrityError:
-        return False, f"Gagal! Barang dengan nama '{nama}' sudah terdaftar di gudang."
-
-def update_stok_gudang(nama, jumlah):
+def update_stok_gudang(nama, jumlah_baru):
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
-    cursor.execute("UPDATE gudang SET stok = ? WHERE nama = ?", (jumlah, nama))
+    cursor.execute("UPDATE gudang SET stok = ? WHERE nama = ?", (jumlah_baru, nama))
     conn.commit()
     conn.close()
 
@@ -181,7 +165,7 @@ def ai_statistical_learning(data_baru):
     return report_ai
 
 def ai_chatbot_brain(pertanyaan):
-    pertanyaan = pertanyaan.lower()
+    pertanyaan = Ball = pertanyaan.lower()
     memori_pengetahuan = get_ai_knowledge()
     database_lab = get_lab_logs()
     
@@ -201,8 +185,8 @@ def ai_chatbot_brain(pertanyaan):
 # ==============================================================================
 # 💻 TAMPILAN FRONTEND WEB STREAMLIT
 # ==============================================================================
-st.title("🧠 ISIS v2.3: Integrated Smart Industrial System + Permanent AI")
-st.caption("Aplikasi Industri Modern - Bug `st.grid` Telah Diperbaiki")
+st.title("🧠 ISIS v2.4: Integrated Smart Industrial System + Permanent AI")
+st.caption("Sistem Kelola Inventaris & Lab Kuantitatif - Fitur Mutasi Stok Masuk/Keluar Tunggal")
 st.markdown("---")
 
 # Sidebar Batas Mutu Lab
@@ -211,9 +195,9 @@ air_max = st.sidebar.number_input("Maks Kadar Air (%)", value=0.1500, step=0.010
 abu_max = st.sidebar.number_input("Maks Kadar Abu (%)", value=0.0500, step=0.0100, format="%.4f")
 iod_min = st.sidebar.number_input("Min Bilangan Iod", value=50.0000, step=1.0000, format="%.4f")
 
-tab_gudang, tab_kalkulator, tab_ai = st.tabs(["📦 1. Gudang & Tambah Barang Baru", "🧮 2. Lab & Analisis QC", "🧠 3. Otak AI & Knowledge"])
+tab_gudang, tab_kalkulator, tab_ai = st.tabs(["📦 1. Logistik & Mutasi Gudang", "🧮 2. Lab & Analisis QC", "🧠 3. Otak AI & Knowledge"])
 
-# --- TAB 1: GUDANG TERINTEGRASI ---
+# --- TAB 1: GUDANG DENGAN MENU MUTASI TUNGGAL ---
 with tab_gudang:
     st.header("📦 Kontrol Riil Inventaris Gudang")
     gudang_aktif = get_gudang_data()
@@ -234,42 +218,33 @@ with tab_gudang:
         st.table(gudang_tampil)
         
     with col_g2:
-        # Form Tambah Barang Baru
-        st.subheader("📥 Tambah Barang Baru (Belum Ada di Rak)")
-        with st.form("form_barang_baru"):
-            nama_baru = st.text_input("Nama Barang/Alat Baru:")
-            stok_awal = st.number_input("Jumlah Stok Masuk Awal:", min_value=1, step=1, value=10)
-            kategori_baru = st.selectbox("Kategori Barang:", ["Alat Gelas", "Bahan Kimia", "Consumables", "Instrumen"])
-            submit_baru = st.form_submit_button("Suntik ke Gudang")
-            
-            if submit_baru:
-                if nama_baru.strip() == "":
-                    st.error("Nama barang tidak boleh kosong!")
-                else:
-                    sukses, pesan = tambah_barang_baru_db(nama_baru.strip(), stok_awal, kategori_baru)
-                    if sukses:
-                        st.success(pesan)
-                        st.rerun()
-                    else:
-                        st.error(pesan)
-                        
-        st.markdown("---")
-        
-        # Menu Ambil Barang
-        st.subheader("🔄 Pengeluaran Barang (Ambil)")
+        # 🔄 MENU TUNGGAL: MUTASI STOK BARANG (MASUK & KELUAR)
+        st.subheader("🔄 Form Mutasi Barang Gudang")
         list_nama = [b["nama"] for b in gudang_aktif]
-        pilih_b = st.selectbox("Pilih Barang:", list_nama)
-        jml_ambil = st.number_input("Jumlah Ambil:", min_value=1, step=1)
         
-        if st.button("Ambil Barang", type="primary"):
-            for b in gudang_aktif:
-                if b["nama"] == pilih_b:
-                    if b["stok"] >= jml_ambil:
-                        update_stok_gudang(pilih_b, b["stok"] - jml_ambil)
-                        st.success("Berhasil! Stok otomatis berkurang di database.")
-                        st.rerun()
-                    else: 
-                        st.error("Stok tidak mencukupi!")
+        if list_nama:
+            pilih_b = st.selectbox("Pilih Barang Laboratorium:", list_nama)
+            jenis_mutasi = st.radio("Jenis Transaksi / Mutasi:", ["Masuk (Restock / Tambah)", "Keluar (Ambil / Pakai)"], horizontal=True)
+            jml_mutasi = st.number_input("Jumlah Volume/Pcs:", min_value=1, step=1, value=1)
+            
+            if st.button("Eksekusi Mutasi Stok", type="primary"):
+                for b in gudang_aktif:
+                    if b["nama"] == pilih_b:
+                        if "Masuk" in jenis_mutasi:
+                            stok_baru = b["stok"] + jml_mutasi
+                            update_stok_gudang(pilih_b, stok_baru)
+                            st.success(f"Berhasil! Stok '{pilih_b}' ditambah sebanyak {jml_mutasi} unit.")
+                            st.rerun()
+                        elif "Keluar" in jenis_mutasi:
+                            if b["stok"] >= jml_mutasi:
+                                stok_baru = b["stok"] - jml_mutasi
+                                update_stok_gudang(pilih_b, stok_baru)
+                                st.success(f"Berhasil! Stok '{pilih_b}' dikurangi sebanyak {jml_mutasi} unit.")
+                                st.rerun()
+                            else:
+                                st.error(f"Gagal! Stok '{pilih_b}' di database tidak mencukupi untuk diambil.")
+        else:
+            st.caption("Tidak ada barang terdaftar di database.")
 
 # --- TAB 2: KALKULATOR ANALISIS QC ---
 with tab_kalkulator:
