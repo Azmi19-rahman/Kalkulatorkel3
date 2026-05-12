@@ -282,4 +282,79 @@ with tab_kalkulator:
         if "Air" in sub_lab:
             w0 = st.number_input("W0 (g):", value=15.0000, format="%.4f")
             w1 = st.number_input("W1 (g):", value=20.0000, format="%.4f")
-            w2 = st.number_input("W2 (g):", value=19.992
+            w2 = st.number_input("W2 (g):", value=19.9920, format="%.4f")
+            if st.button("Hitung & Tulis ke Database Harddisk"):
+                hasil = hitung_kadar_air(w0, w1, w2)
+                status = "PASSED" if hasil <= air_max else "REJECTED"
+                biner = desimal_ke_biner(len(get_lab_logs()) + 1)
+                save_lab_log(biner, nama_smpl, "Kadar Air", hasil, status)
+                st.session_state["ai_persistent_rep"] = ai_statistical_learning({"id_biner": biner, "parameter": "Kadar Air", "nilai": hasil, "status": status})
+                st.rerun()
+                
+        elif "Abu" in sub_lab:
+            w0 = st.number_input("W0 (g):", value=20.0000, format="%.4f")
+            w1 = st.number_input("W1 (g):", value=25.0000, format="%.4f")
+            w2 = st.number_input("W2 (g):", value=20.0020, format="%.4f")
+            if st.button("Hitung & Tulis ke Database Harddisk"):
+                hasil = hitung_kadar_abu(w0, w1, w2)
+                status = "PASSED" if hasil <= abu_max else "REJECTED"
+                biner = desimal_ke_biner(len(get_lab_logs()) + 1)
+                save_lab_log(biner, nama_smpl, "Kadar Abu", hasil, status)
+                st.session_state["ai_persistent_rep"] = ai_statistical_learning({"id_biner": biner, "parameter": "Kadar Abu", "nilai": hasil, "status": status})
+                st.rerun()
+
+        elif "Iod" in sub_lab:
+            vol = st.number_input("Volume (mL):", value=14.00, format="%.2f")
+            norm = st.number_input("Normalitas (N):", value=0.1000, format="%.4f")
+            berat = st.number_input("Berat Minyak (g):", value=0.5000, format="%.4f")
+            if st.button("Hitung & Tulis ke Database Harddisk"):
+                hasil = hitung_iod_hubl(vol, norm, berat)
+                status = "PASSED" if hasil >= iod_min else "REJECTED"
+                biner = desimal_ke_biner(len(get_lab_logs()) + 1)
+                save_lab_log(biner, nama_smpl, "Iod-Hubl", hasil, status)
+                st.session_state["ai_persistent_rep"] = ai_statistical_learning({"id_biner": biner, "parameter": "Iod-Hubl", "nilai": hasil, "status": status})
+                st.rerun()
+
+    with col_l2:
+        st.subheader("🧐 Evaluasi Otak AI Permanen")
+        if "ai_persistent_rep" in st.session_state: st.info(st.session_state["ai_persistent_rep"])
+        else: st.caption("Lakukan kalkulasi untuk memicu analisis database oleh AI.")
+
+    st.markdown("---")
+    st.subheader("📋 Seluruh Riwayat yang Tersimpan di Harddisk Laptop")
+    logs_tersimpan = get_lab_logs()
+    if logs_tersimpan:
+        st.table(logs_tersimpan)
+        
+        # Operasi Set (Bab V)
+        set_semua = {d["sampel"] for d in logs_tersimpan}
+        set_reject = {d["sampel"] for d in logs_tersimpan if d["status"] == "REJECTED"}
+        st.write(f"🔴 **Set Produk Gagal (Tersimpan Fisik):** {set_reject if set_reject else 'Tidak ada'}")
+        st.write(f"🟢 **Set Produk Lolos Sempurna:** {set_semua.difference(set_reject) if set_semua.difference(set_reject) else 'Tidak ada'}")
+        
+        if st.button("Format/Hapus Seluruh Database Log Lab"):
+            clear_lab_logs(); st.rerun()
+    else: st.caption("Belum ada data pengujian fisik di harddisk.")
+
+# --- TAB 3: OTAK AI & PEMBELAJARAN ---
+with tab_ai:
+    st.header("🧠 Long-Term Memory AI")
+    col_a1, col_a2 = st.columns(2)
+    
+    with col_a1:
+        st.subheader("📖 Ajarkan SOP/Aturan Baru Selamanya")
+        topik = st.text_input("Topik Baru:").lower().strip()
+        penjelasan = st.text_area("Penjelasan/Instruksi SOP:")
+        if st.button("Suntikkan ke Memori Jangka Panjang AI"):
+            if topik and penjelasan:
+                save_ai_knowledge(topik, penjelasan)
+                st.toast("AI berhasil mencatatnya ke dalam sel memori permanen!"); st.rerun()
+                
+        st.subheader("📚 Isi Otak AI di Harddisk Saat Ini")
+        st.json(get_ai_knowledge())
+
+    with col_a2:
+        st.subheader("💬 Tes Ingatan AI Pasca Web Ditutup")
+        chat_in = st.text_input("Tanya AI:")
+        if chat_in:
+            st.chat_message("assistant").write(ai_chatbot_brain(chat_in))
