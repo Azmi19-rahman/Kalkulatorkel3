@@ -3,8 +3,8 @@ import numpy as np
 import sqlite3
 
 # ==============================================================================
-# PROYEK: WATER QUALITY ANALYTICS SYSTEM (STYLISH & COLORFUL EDITION)
-# Tampilan UI Interaktif, Estetik, Modern, dan Kontras Tinggi
+# PROYEK: WATER QUALITY ANALYTICS SYSTEM (LIVE BACKGROUND & CYBER THEME)
+# Tampilan UI Interaktif dengan Background Kustom Berwarna Hidup
 # ==============================================================================
 
 st.set_page_config(page_title="Water Quality Analytics System", page_icon="💧", layout="wide")
@@ -31,7 +31,7 @@ def init_db():
     cursor.execute("SELECT COUNT(*) FROM ai_knowledge")
     if cursor.fetchone()[0] == 0:
         knowledge_awal = [
-            ("bod", "BOD (Biochemical Oxygen Demand) merupakan takaran jumlah oksigen terlarut yang diperlukan oleh mikroorganisme untuk mendekomposisi bahan organik dalam air selama 5 days."),
+            ("bod", "BOD (Biochemical Oxygen Demand) merupakan takaran jumlah oksigen terlarut yang diperlukan oleh mikroorganisme untuk mendekomposisi bahan organik dalam air selama 5 hari."),
             ("cod", "COD (Chemical Oxygen Demand) adalah jumlah total oksigen yang dibutuhkan untuk mengurai seluruh bahan organik melalui reaksi kimia menggunakan oksidator kuat."),
             ("tss", "TSS (Total Suspended Solids) adalah material padatan tersuspensi (diameter > 1 mikrometer) yang tertahan pada media penyaring seperti kertas saring Whatman 41 setelah dikeringkan pada suhu 103-105°C."),
             ("do", "DO (Dissolved Oxygen) atau oksigen terlarut menunjukkan volume gas oksigen yang terkandung di dalam air. Kadar DO yang tinggi menandakan kualitas air yang baik untuk kehidupan akuatik."),
@@ -173,53 +173,73 @@ def ai_chatbot_brain(pertanyaan):
 
 
 # ==============================================================================
-# 📱 TAMPILAN FRONTEND WEB STREAMLIT (HIASAN WARNA & CSS)
+# 📱 TAMPILAN FRONTEND WEB STREAMLIT (KUSTOMISASI BACKGROUND & CSS GLOBAL)
 # ==============================================================================
 
-# --- KUSTOMISASI CSS SIDEBAR & STYLE ---
 st.markdown("""
     <style>
+    /* 1. MENGUBAH BACKGROUND HALAMAN UTAMA */
+    .stApp {
+        background: linear-gradient(135deg, #0f172a 0%, #1e1e38 50%, #0d1117 100%);
+        color: #f8fafc !important;
+    }
+    
+    /* 2. MENGUBAH BACKGROUND SIDEBAR */
+    [data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #0b0f19 0%, #111827 100%) !important;
+        border-right: 2px solid #1e293b;
+    }
+    
+    /* 3. STYLE HURUF & TEXT */
     .main-title {
-        font-size: 42px;
+        font-size: 40px;
         font-weight: 800;
-        background: linear-gradient(45deg, #00c6ff, #0072ff);
+        background: linear-gradient(45deg, #00f2fe, #4facfe);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         margin-bottom: 5px;
     }
+    
+    /* 4. DESIGN KOTAK KUSTOM (CARDS) */
     .card-box-1 {
-        background-color: #e3f2fd;
-        padding: 20px;
+        background-color: rgba(14, 165, 233, 0.15);
+        padding: 22px;
         border-radius: 12px;
-        border-left: 6px solid #0072ff;
-        color: #0d47a1;
+        border: 1px solid rgba(14, 165, 233, 0.4);
+        border-left: 6px solid #0284c7;
+        color: #e0f2fe;
         margin-bottom: 15px;
     }
     .card-box-2 {
-        background-color: #e8f5e9;
-        padding: 20px;
+        background-color: rgba(34, 197, 94, 0.15);
+        padding: 22px;
         border-radius: 12px;
-        border-left: 6px solid #2e7d32;
-        color: #1b5e20;
+        border: 1px solid rgba(34, 197, 94, 0.4);
+        border-left: 6px solid #16a34a;
+        color: #dcfce7;
         margin-bottom: 15px;
     }
     .section-head {
-        color: #00c6ff;
+        color: #38bdf8;
         font-weight: bold;
-        border-bottom: 2px solid #333;
+        border-bottom: 2px solid #1e293b;
         padding-bottom: 5px;
         margin-top: 15px;
+    }
+    
+    /* 5. MENYESUAIKAN TEKS PADA LABEL KOMPONEN */
+    label, p, span {
+        color: #e2e8f0 !important;
     }
     </style>
 """, unsafe_allow_html=True)
 
 # --- KOLOM 1: SIDEBAR (NAVIGASI) ---
 with st.sidebar:
-    st.markdown("<h2 style='color: #00c6ff; margin-bottom: 0px;'>💧 Water Quality</h2>", unsafe_allow_html=True)
-    st.markdown("<p style='font-style: italic; color: #aaa;'>Politeknik AKA Bogor</p>", unsafe_allow_html=True)
+    st.markdown("<h2 style='color: #38bdf8; margin-bottom: 0px; font-weight:800;'>💧 Water Quality</h2>", unsafe_allow_html=True)
+    st.markdown("<p style='font-style: italic; color: #94a3b8; margin-top:0px;'>Politeknik AKA Bogor</p>", unsafe_allow_html=True)
     st.markdown("---")
     
-    # Navigasi Radio Button Menu
     pilih_fitur = st.radio(
         "📌 Pilih Fitur Utama:",
         [
@@ -234,8 +254,7 @@ with st.sidebar:
     )
     st.markdown("---")
     
-    # Ringkasan Metrics
-    st.markdown("<h4 style='color: #fff;'>📊 Ringkasan Live Lab</h4>", unsafe_allow_html=True)
+    st.markdown("<h4 style='color: #38bdf8;'>📊 Ringkasan Live Lab</h4>", unsafe_allow_html=True)
     logs_saat_ini = get_water_logs()
     total_data = len(logs_saat_ini)
     total_bermasalah = sum(1 for d in logs_saat_ini if d["status"] in ["MELEBIHI AMBANG", "DI BAWAH MINIMUM"])
@@ -256,7 +275,7 @@ if pilih_fitur == "Beranda":
     with col_ref1:
         st.markdown("""
             <div class='card-box-1'>
-                <h3>🎯 Tujuan Aplikasi</h3>
+                <h3 style='color: #38bdf8; margin-top:0px;'>🎯 Tujuan Aplikasi</h3>
                 <p>Aplikasi ini dirancang sebagai solusi digital terintegrasi untuk mendampingi laboran serta analis kimia dalam memproses pengujian parameter kualitas air (BOD, COD, TSS, dan DO). Sistem mengotomatisasi kalkulasi bertingkat untuk mengeliminasi faktor galat manusia, sekaligus mengamankan penyimpanan data ke memori fisik komputer secara real-time.</p>
             </div>
         """, unsafe_allow_html=True)
@@ -264,7 +283,7 @@ if pilih_fitur == "Beranda":
     with col_ref2:
         st.markdown("""
             <div class='card-box-2'>
-                <h3>📚 Manfaat Aplikasi</h3>
+                <h3 style='color: #4ade80; margin-top:0px;'>📚 Manfaat Aplikasi</h3>
                 <p>Lewat integrasi basis data SQLite, kepatuhan validitas pengujian dan prinsip 'data integrity' laboratorium lingkungan tetap terjaga penuh. Didukung modul evaluasi otomatis berbasis kecerdasan buatan (AI), proses penyusunan narasi Bab 3 Pembahasan laporan praktikum atau kerja industri menjadi jauh lebih cepat, terstruktur, dan akurat.</p>
             </div>
         """, unsafe_allow_html=True)
@@ -275,7 +294,7 @@ if pilih_fitur == "Beranda":
 
 # 🧪 MENU 2: PERHITUNGAN BOD
 elif pilih_fitur == "Perhitungan BOD":
-    st.markdown("<h1 style='color: #00c6ff;'>🧪 Input Analisis Parameter BOD</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='color: #38bdf8;'>🧪 Input Analisis Parameter BOD</h1>", unsafe_allow_html=True)
     st.caption("Metode Titrasi Iodometri (Winkler) / DO Meter pasca Inkubasi 5 Hari")
     st.markdown("---")
     
@@ -302,7 +321,7 @@ elif pilih_fitur == "Perhitungan BOD":
             st.rerun()
 
     with col_l2:
-        st.markdown("<h3 style='color: #00c6ff;'>🧐 Hasil & Pembahasan AI</h3>", unsafe_allow_html=True)
+        st.markdown("<h3 style='color: #38bdf8;'>🧐 Hasil & Pembahasan AI</h3>", unsafe_allow_html=True)
         if "pembahasan_bod" in st.session_state:
             if st.session_state["status_bod"] == "MEMENUHI SYARAT":
                 st.success(f"🎉 HASIL: {st.session_state['nilai_bod']:.4f} mg/L ({st.session_state['status_bod']})")
@@ -315,8 +334,8 @@ elif pilih_fitur == "Perhitungan BOD":
 
 # 🧪 MENU 3: PERHITUNGAN COD
 elif pilih_fitur == "Perhitungan COD":
-    st.markdown("<h1 style='color: #00c6ff;'>🧪 Input Analisis Parameter COD</h1>", unsafe_allow_html=True)
-    st.caption("Metode Refluks Terbuks / Titrasi dengan Larutan FAS")
+    st.markdown("<h1 style='color: #38bdf8;'>🧪 Input Analisis Parameter COD</h1>", unsafe_allow_html=True)
+    st.caption("Metode Refluks Terbuka / Titrasi dengan Larutan FAS")
     st.markdown("---")
     
     cod_max = st.number_input("🚨 Batas Maks Baku Mutu COD (mg/L):", value=25.0000, step=1.0000, format="%.4f")
@@ -343,7 +362,7 @@ elif pilih_fitur == "Perhitungan COD":
             st.rerun()
 
     with col_l2:
-        st.markdown("<h3 style='color: #00c6ff;'>🧐 Hasil & Pembahasan AI</h3>", unsafe_allow_html=True)
+        st.markdown("<h3 style='color: #38bdf8;'>🧐 Hasil & Pembahasan AI</h3>", unsafe_allow_html=True)
         if "pembahasan_cod" in st.session_state:
             if st.session_state["status_cod"] == "MEMENUHI SYARAT":
                 st.success(f"🎉 HASIL: {st.session_state['nilai_cod']:.4f} mg/L ({st.session_state['status_cod']})")
@@ -356,7 +375,7 @@ elif pilih_fitur == "Perhitungan COD":
 
 # ⚖️ MENU 4: PERHITUNGAN TSS
 elif pilih_fitur == "Perhitungan TSS":
-    st.markdown("<h1 style='color: #00c6ff;'>⚖️ Input Analisis Parameter TSS</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='color: #38bdf8;'>⚖️ Input Analisis Parameter TSS</h1>", unsafe_allow_html=True)
     st.caption("Metode Gravimetri (Penyaringan dengan Kertas Saring & Oven 105°C)")
     st.markdown("---")
     
@@ -383,7 +402,7 @@ elif pilih_fitur == "Perhitungan TSS":
             st.rerun()
 
     with col_n2:
-        st.markdown("<h3 style='color: #00c6ff;'>🧐 Hasil & Pembahasan AI</h3>", unsafe_allow_html=True)
+        st.markdown("<h3 style='color: #38bdf8;'>🧐 Hasil & Pembahasan AI</h3>", unsafe_allow_html=True)
         if "pembahasan_tss" in st.session_state:
             if st.session_state["status_tss"] == "MEMENUHI SYARAT":
                 st.success(f"🎉 HASIL: {st.session_state['nilai_tss']:.4f} mg/L ({st.session_state['status_tss']})")
@@ -396,7 +415,7 @@ elif pilih_fitur == "Perhitungan TSS":
 
 # ⚖️ MENU 5: PERHITUNGAN DO
 elif pilih_fitur == "Perhitungan DO":
-    st.markdown("<h1 style='color: #00c6ff;'>🧪 Input Analisis Parameter DO</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='color: #38bdf8;'>🧪 Input Analisis Parameter DO</h1>", unsafe_allow_html=True)
     st.caption("Metode Standar Fiksasi Lapangan & Titrasi Natrium Thiosulfat (Na2S2O3)")
     st.markdown("---")
     
@@ -423,7 +442,7 @@ elif pilih_fitur == "Perhitungan DO":
             st.rerun()
 
     with col_n2:
-        st.markdown("<h3 style='color: #00c6ff;'>🧐 Hasil & Pembahasan AI</h3>", unsafe_allow_html=True)
+        st.markdown("<h3 style='color: #38bdf8;'>🧐 Hasil & Pembahasan AI</h3>", unsafe_allow_html=True)
         if "pembahasan_do" in st.session_state:
             if st.session_state["status_do"] == "MEMENUHI SYARAT":
                 st.success(f"🎉 HASIL: {st.session_state['nilai_do']:.4f} mg/L ({st.session_state['status_do']})")
@@ -436,12 +455,11 @@ elif pilih_fitur == "Perhitungan DO":
 
 # 📊 MENU 6: DATABASE RIWAYAT SAMPEL
 elif pilih_fitur == "Database Riwayat Sampel":
-    st.markdown("<h1 style='color: #00c6ff;'>📊 Rekam Data Kualitas Air Permanen</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='color: #38bdf8;'>📊 Rekam Data Kualitas Air Permanen</h1>", unsafe_allow_html=True)
     st.caption("Seluruh riwayat pengujian sampel terintegrasi langsung di database fisik harddisk SQLite")
     st.markdown("---")
     
     if logs_saat_ini:
-        # Menampilkan tabel riwayat data lab
         st.table(logs_saat_ini)
         
         set_semua = {d["sampel"] for d in logs_saat_ini}
@@ -450,9 +468,9 @@ elif pilih_fitur == "Database Riwayat Sampel":
         st.markdown("<h3 class='section-head'>📊 Analisis Matematika Set Laboratorium</h3>", unsafe_allow_html=True)
         col_s1, col_s2 = st.columns(2)
         with col_s1:
-            st.warning(f"⚠️ **Set Lokasi Bermasalah:** {set_tercemar if set_tercemar else 'Tidak ada'}")
+            st.markdown(f"<div style='background-color:rgba(239,68,68,0.2); padding:15px; border-radius:8px; border-left:4px solid #ef4444;'>⚠️ <b>Set Lokasi Bermasalah:</b> {set_tercemar if set_tercemar else 'Tidak ada'}</div>", unsafe_allow_html=True)
         with col_s2:
-            st.success(f"✅ **Set Lokasi Lolos Syarat:** {set_semua.difference(set_tercemar) if set_semua.difference(set_tercemar) else 'Tidak ada'}")
+            st.markdown(f"<div style='background-color:rgba(34,197,94,0.2); padding:15px; border-radius:8px; border-left:4px solid #22c55e;'>✅ <b>Set Lokasi Lolos Syarat:</b> {set_semua.difference(set_tercemar) if set_semua.difference(set_tercemar) else 'Tidak ada'}</div>", unsafe_allow_html=True)
         
         st.markdown("---")
         if st.button("🗑️ Kosongkan Seluruh Riwayat Database", use_container_width=True):
@@ -464,7 +482,7 @@ elif pilih_fitur == "Database Riwayat Sampel":
 
 # 🧠 MENU 7: INTELIGENSIA & KONSULTASI AI
 elif pilih_fitur == "Inteligensia & Konsultasi AI":
-    st.markdown("<h1 style='color: #00c6ff;'>🧠 Pusat Kendali Pengetahuan & Konsultasi AI</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='color: #38bdf8;'>🧠 Pusat Kendali Pengetahuan & Konsultasi AI</h1>", unsafe_allow_html=True)
     st.caption("Diskusikan hasil analisis mutu air secara langsung atau tambahkan Standar Prosedur Operasional baru")
     st.markdown("---")
     
