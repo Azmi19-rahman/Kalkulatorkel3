@@ -1,15 +1,30 @@
 import streamlit as st
 import numpy as np
 import sqlite3
+import base64
+import os
 
 # ==============================================================================
-# PROYEK: WATER QUALITY ANALYTICS SYSTEM (ESTETIK LABORATURIUM EDITION)
-# Tampilan UI Interaktif Berbasis Estetika Gambar Kimia dengan Animasi Hidup
+# PROYEK: WATER QUALITY ANALYTICS SYSTEM (CUSTOM IMAGE ANIMATED EDITION)
 # ==============================================================================
 
 st.set_page_config(page_title="Water Quality Analytics System", page_icon="💧", layout="wide")
 
 DB_FILE = "isis_water_quality.db"
+
+# ==============================================================================
+# 🖼️ FUNGSI ENKROPSI GAMBAR BACKGROUND KE BASE64
+# ==============================================================================
+def get_base64_image(image_path):
+    # Memastikan file gambar ada di folder project
+    if os.path.exists(image_path):
+        with open(image_path, "rb") as img_file:
+            return base64.b64encode(img_file.read()).decode()
+    return ""
+
+# Taruh gambar lab kamu di folder yang sama dengan app.py, beri nama 'bg_lab.png'
+# Jika formatnya .jpg atau .jpeg, silakan ganti nama file di bawah ini.
+img_base64 = get_base64_image("bg_lab.png")
 
 # ==============================================================================
 # 🗃️ INISIALISASI DATABASE FISIK (SQLITE)
@@ -141,7 +156,7 @@ def ai_water_evaluation(data_baru, batas_acuan, parameter_nama, tipe_ambang="mak
     return pembahasan
 
 def ai_chatbot_brain(pertanyaan):
-    pertanyaan = pertanyaan.lower().strip()
+    pertanyaan = presidential_speech = pertanyaan.lower().strip()
     memori_pengetahuan = get_ai_knowledge()
     database_air = get_water_logs()
     
@@ -173,14 +188,14 @@ def ai_chatbot_brain(pertanyaan):
 
 
 # ==============================================================================
-# 📱 FRONTEND & SUNTIKAN INTEGRASI BACKGROUND CHEMISTRY & ANIMASI PARTIKEL
+# 📱 FRONTEND & SUNTIKAN INTEGRASI BACKGROUND ASLI DAN ANIMASI LEMBUT
 # ==============================================================================
 
-# 🌌 1. Injeksi Canvas HTML5 untuk Efek Animasi Gelembung/Molekul Naik Berpendar
+# 🌌 1. Injeksi Canvas HTML5 untuk Efek Animasi Gelembung Mikro Naik Lembut di Atas Background
 st.markdown("""
-    <canvas id="chemBubbleCanvas" style="position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:-1; pointer-events:none; opacity:0.65;"></canvas>
+    <canvas id="customLabCanvas" style="position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:-1; pointer-events:none; opacity:0.5;"></canvas>
     <script>
-    const canvas = document.getElementById('chemBubbleCanvas');
+    const canvas = document.getElementById('customLabCanvas');
     const ctx = canvas.getContext('2d');
 
     function resize() {
@@ -190,143 +205,124 @@ st.markdown("""
     window.addEventListener('resize', resize);
     resize();
 
-    const particles = [];
-    // Membuat 25 partikel molekul gas terlarut
-    for(let i=0; i<25; i++) {
-        particles.push({
+    const dots = [];
+    for(let i=0; i<20; i++) {
+        dots.push({
             x: Math.random() * canvas.width,
-            y: canvas.height + Math.random() * 200,
-            radius: Math.random() * 5 + 2,
-            speed: Math.random() * 1 + 0.5,
-            opacity: Math.random() * 0.4 + 0.1,
-            wobble: Math.random() * 2,
-            wobbleSpeed: Math.random() * 0.02
+            y: canvas.height + Math.random() * 100,
+            r: Math.random() * 4 + 2,
+            v: Math.random() * 0.8 + 0.3,
+            op: Math.random() * 0.3 + 0.1
         });
     }
 
-    function animate() {
+    function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        particles.forEach(p => {
-            p.y -= p.speed;
-            p.wobble += p.wobbleSpeed;
-            p.x += Math.sin(p.wobble) * 0.3;
-
-            // Jika partikel sampai ke atas, reset kembali ke bawah
-            if(p.y < -10) {
-                p.y = canvas.height + 10;
-                p.x = Math.random() * canvas.width;
+        dots.forEach(d => {
+            d.y -= d.v;
+            if(d.y < -10) {
+                d.y = canvas.height + 10;
+                d.x = Math.random() * canvas.width;
             }
-
-            // Gambar partikel gelembung gas/molekul air cairan berpencar pelan
             ctx.beginPath();
-            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(74, 144, 226, ${p.opacity})`;
-            ctx.shadowBlur = 10;
-            ctx.shadowColor = "rgba(74, 144, 226, 0.5)";
+            ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(100, 180, 255, ${d.op})`;
             ctx.fill();
         });
-        
-        requestAnimationFrame(animate);
+        requestAnimationFrame(draw);
     }
-    animate();
+    draw();
     </script>
 """, unsafe_allow_html=True)
 
-# 🎨 2. Kustomisasi Gaya CSS Tema Putih-Biru Lab Estetik (Terinspirasi Gambar)
-st.markdown("""
+# 🎨 2. CSS Kustom untuk Pasang Gambar Kamu Jadi Background Utama & Efek Glassmorphism
+if img_base64:
+    # Jika gambar berhasil diload dari folder lokal
+    bg_style = f"""
+    background: linear-gradient(135deg, rgba(255,255,255,0.75) 0%, rgba(240,247,255,0.8) 100%), 
+                url('data:image/png;base64,{img_base64}') no-repeat center center fixed;
+    background-size: cover;
+    """
+else:
+    # Fallback jika kamu belum menaruh gambar bg_lab.png di folder
+    bg_style = """
+    background: linear-gradient(135deg, #ffffff 0%, #e6f2ff 100%);
+    """
+
+st.markdown(f"""
     <style>
-    /* 1. MENGUBAH BACKGROUND UTAMA DAN SIDEBAR (Skema Warna Lab Cerah & Segar) */
-    .stApp {
-        background: linear-gradient(135deg, rgba(255,255,255,0.85) 0%, rgba(230,242,255,0.9) 100%), 
-                    url('https://images.unsplash.com/photo-1532187863486-abf9d39d6618?q=80&w=1000&auto=format&fit=crop') no-repeat center center fixed;
-        background-size: cover;
+    /* Pasang background custom */
+    .stApp {{
+        {bg_style}
         color: #1e293b !important;
-    }
+    }}
     
-    [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%) !important;
-        border-right: 2px solid #cbd5e1;
-    }
+    [data-testid="stSidebar"] {{
+        background: rgba(248, 250, 252, 0.55) !important;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-right: 1px solid rgba(203, 213, 225, 0.5);
+    }}
     
-    /* 2. GRADIENT TEXT UNTUK JUDUL UTAMA APP */
-    .main-title {
+    .main-title {{
         font-size: 38px;
         font-weight: 800;
-        background: linear-gradient(45deg, #1d4ed8, #0284c7, #2563eb);
+        background: linear-gradient(45deg, #0284c7, #1e40af);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        margin-bottom: 2px;
-    }
+    }}
     
-    /* 3. EFEK KACA (GLASSMORPHISM) PADA KONTAINER BOX AGAR KELIHATAN MODERN */
-    .card-box-1 {
-        background: rgba(255, 255, 255, 0.65);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
+    /* EFEK KACA (GLASSMORPHISM) BERSIH SUPAYA GAMBAR KAMU TEMBUS KE DEPAN */
+    .card-box-1 {{
+        background: rgba(255, 255, 255, 0.55);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
         padding: 22px;
         border-radius: 14px;
-        border: 1px solid rgba(14, 165, 233, 0.25);
+        border: 1px solid rgba(14, 165, 233, 0.2);
         border-left: 6px solid #0284c7;
-        color: #0f172a;
+        color: #1e293b;
         margin-bottom: 15px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .card-box-1:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(2, 132, 199, 0.15);
-    }
+        box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+    }}
     
-    .card-box-2 {
-        background: rgba(255, 255, 255, 0.65);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
+    .card-box-2 {{
+        background: rgba(255, 255, 255, 0.55);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
         padding: 22px;
         border-radius: 14px;
-        border: 1px solid rgba(22, 163, 74, 0.25);
+        border: 1px solid rgba(22, 163, 74, 0.2);
         border-left: 6px solid #16a34a;
-        color: #0f172a;
+        color: #1e293b;
         margin-bottom: 15px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .card-box-2:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(22, 163, 74, 0.15);
-    }
+        box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+    }}
     
-    .section-head {
+    .section-head {{
         color: #0369a1;
         font-weight: bold;
-        border-bottom: 2px solid #cbd5e1;
+        border-bottom: 2px solid rgba(203, 213, 225, 0.6);
         padding-bottom: 5px;
         margin-top: 15px;
-    }
+    }}
     
-    /* 4. PENYESUAIAN WARNA INPUTAN & TEKS BIAR GAK TABRAKAN */
-    label, p, span, div {
+    label, p, span, div {{
         color: #334155 !important;
-    }
-    h1, h2, h3, h4, h5, h6 {
+    }}
+    h1, h2, h3, h4, h5, h6 {{
         color: #0f172a !important;
-    }
+    }}
     
-    /* Tombol Interaktif Kustom */
-    .stButton>button {
-        background: linear-gradient(45deg, #0284c7, #3b82f6) !important;
+    /* Ganti desain tombol input bawaan Streamlit agar serasi dengan watercolor biru */
+    .stButton>button {{
+        background: linear-gradient(45deg, #0284c7, #2563eb) !important;
         color: white !important;
-        border: none !important;
         border-radius: 8px !important;
-        padding: 10px 20px !important;
+        border: none !important;
         font-weight: 600 !important;
-        box-shadow: 0 4px 10px rgba(59, 130, 246, 0.2) !important;
-        transition: all 0.2s ease !important;
-    }
-    .stButton>button:hover {
-        transform: scale(1.01) !important;
-        box-shadow: 0 6px 15px rgba(59, 130, 246, 0.35) !important;
-    }
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2) !important;
+    }}
     </style>
 """, unsafe_allow_html=True)
 
@@ -565,9 +561,9 @@ elif pilih_fitur == "Database Riwayat Sampel":
         st.markdown("<h3 class='section-head'>📊 Analisis Matematika Set Laboratorium</h3>", unsafe_allow_html=True)
         col_s1, col_s2 = st.columns(2)
         with col_s1:
-            st.markdown(f"<div style='background-color:rgba(239,68,68,0.1); padding:15px; border-radius:8px; border:1px solid rgba(239,68,68,0.3); border-left:4px solid #ef4444;'>⚠️ <b>Set Lokasi Bermasalah:</b> {set_tercemar if set_tercemar else 'Tidak ada'}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='background-color:rgba(239,68,68,0.05); padding:15px; border-radius:8px; border:1px solid rgba(239,68,68,0.2); border-left:4px solid #ef4444;'>⚠️ <b>Set Lokasi Bermasalah:</b> {set_tercemar if set_tercemar else 'Tidak ada'}</div>", unsafe_allow_html=True)
         with col_s2:
-            st.markdown(f"<div style='background-color:rgba(34,197,94,0.1); padding:15px; border-radius:8px; border:1px solid rgba(34,197,94,0.3); border-left:4px solid #22c55e;'>✅ <b>Set Lokasi Lolos Syarat:</b> {set_semua.difference(set_tercemar) if set_semua.difference(set_tercemar) else 'Tidak ada'}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='background-color:rgba(34,197,94,0.05); padding:15px; border-radius:8px; border:1px solid rgba(34,197,94,0.2); border-left:4px solid #22c55e;'>✅ <b>Set Lokasi Lolos Syarat:</b> {set_semua.difference(set_tercemar) if set_semua.difference(set_tercemar) else 'Tidak ada'}</div>", unsafe_allow_html=True)
         
         st.markdown("---")
         if st.button("🗑️ Kosongkan Seluruh Riwayat Database", use_container_width=True):
