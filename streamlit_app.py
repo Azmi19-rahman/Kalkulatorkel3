@@ -282,4 +282,3 @@ with tab_ai:
         chat_in = st.text_input("Tanyakan sesuatu ke AI (Contoh: 'halo', 'bod', 'cod', atau 'rekap'):")
         if chat_in:
             st.chat_message("assistant").write(ai_chatbot_brain(chat_in))
-            
