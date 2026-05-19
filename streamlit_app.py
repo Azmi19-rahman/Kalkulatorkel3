@@ -3,7 +3,7 @@ import numpy as np
 import sqlite3
 
 # ==============================================================================
-# PROYEK: ISIS v3.6 (Pembaruan) - FORMAT KETERANGAN CASUAL & INFORMATIF
+# PROYEK: ISIS  (Pembaruan) - FORMAT KETERANGAN CASUAL & INFORMATIF
 # Layout: Chat AI di Kiri, Manajemen Pengetahuan di Kanan
 # ==============================================================================
 
