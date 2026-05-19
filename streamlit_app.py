@@ -3,7 +3,7 @@ import numpy as np
 import sqlite3
 
 # ==============================================================================
-# PROYEK: ISIS v3.6 - DESAIN MODERN, BERSIH, DAN MINIM EMOJI
+# PROYEK: ISIS v3.6 (Pembaruan) - FORMAT KETERANGAN CASUAL & INFORMATIF
 # Layout: Chat AI di Kiri, Manajemen Pengetahuan di Kanan
 # ==============================================================================
 
@@ -33,7 +33,7 @@ def init_db():
         knowledge_awal = [
             ("bod", "BOD (Biochemical Oxygen Demand) merupakan takaran jumlah oksigen terlarut yang diperlukan oleh mikroorganisme untuk mendekomposisi bahan organik dalam air. Semakin tinggi nilai BOD, semakin rendah kualitas oksigen terlarut bagi ekosistem perairan."),
             ("cod", "COD (Chemical Oxygen Demand) adalah jumlah total oksigen yang dibutuhkan untuk mengurai seluruh bahan organik melalui reaksi kimia menggunakan oksidator kuat. Nilai COD umumnya selalu lebih besar daripada BOD."),
-            ("regulasi", "Baku mutu nasional menetapkan batas aman untuk menjaga kelestarian lingkungan. Berdasarkan standar peruntukan kelas air, parameter BOD biasanya berkisar antara 2-12 mg/L dan COD berkisar antara 10-80 mg/L.")
+            ("regulasi", "Baku mutu nasional menetapkan batas aman untuk menjaga kelestarian lingkungan. Berdasarkan standar peruntukan kelas air, parameter BOD biasanya berkisar antara 2-12 mg/L and COD berkisar antara 10-80 mg/L.")
         ]
         cursor.executemany("INSERT OR IGNORE INTO ai_knowledge VALUES (?, ?)", knowledge_awal)
         
@@ -129,7 +129,7 @@ def ai_water_evaluation(data_baru, batas_maks):
 
 # OTAK AI YANG MIRIP CHAT ASISTEN (CASUAL & ADAPTIF)
 def ai_chatbot_brain(pertanyaan):
-    pertanyaan = pertanyaan.lower().strip()
+    pertanyaan = Ball_raw = pertanyaan.lower().strip()
     memori_pengetahuan = get_ai_knowledge()
     database_air = get_water_logs()
     
@@ -209,7 +209,9 @@ with tab_kalkulator:
                 status = "MEMENUHI SYARAT" if hasil <= bod_max else "MELEBIHI AMBANG"
                 biner_id = desimal_ke_biner(len(get_water_logs()) + 1)
                 
-                ket_singkat = f"DO0={do_0}, DO5={do_5}, P={f_pengenceran}"
+                # REFORMASI TEKS KETERANGAN: Dibuat kalimat deskriptif yang mudah dipahami
+                ket_singkat = f"Diukur dengan DO awal {do_0} mg/L dan DO akhir {do_5} mg/L melalui faktor pengenceran {f_pengenceran} kali."
+                
                 save_water_log(biner_id, nama_smpl, "BOD", hasil, status, ket_singkat)
                 st.session_state["pembahasan_ai"] = ai_water_evaluation({"id_biner": biner_id, "parameter": "BOD", "nilai": hasil, "status": status}, bod_max)
                 st.rerun()
@@ -226,7 +228,9 @@ with tab_kalkulator:
                 status = "MEMENUHI SYARAT" if hasil <= cod_max else "MELEBIHI AMBANG"
                 biner_id = desimal_ke_biner(len(get_water_logs()) + 1)
                 
-                ket_singkat = f"V_B={v_blanko}, V_S={v_sampel}, N_FAS={n_fas}"
+                # REFORMASI TEKS KETERANGAN: Dibuat kalimat deskriptif yang mudah dipahami
+                ket_singkat = f"Hasil titrasi larutan FAS pada volume blanko {v_blanko} mL, volume sampel {v_sampel} mL, dengan normalitas larutan {n_fas} N."
+                
                 save_water_log(biner_id, nama_smpl, "COD", hasil, status, ket_singkat)
                 st.session_state["pembahasan_ai"] = ai_water_evaluation({"id_biner": biner_id, "parameter": "COD", "nilai": hasil, "status": status}, cod_max)
                 st.rerun()
@@ -242,7 +246,6 @@ with tab_kalkulator:
 with tab_riwayat:
     st.subheader("Rekam Data Kualitas Air Permanen")
     if logs_saat_ini:
-        # Penambahan widget metrics modern untuk dashboard ringkasan
         total_data = len(logs_saat_ini)
         total_tercemar = sum(1 for d in logs_saat_ini if d["status"] == "MELEBIHI AMBANG")
         
@@ -271,14 +274,12 @@ with tab_ai:
     st.subheader("Pusat Kendali Pengetahuan & Konsultasi AI")
     col_a1, col_a2 = st.columns(2)
     
-    # KOLOM KIRI (col_a1): Ruang Chat Konsultasi AI
     with col_a1:
         st.write("**Konsultasi Mutu Air Bersama AI**")
         chat_in = st.text_input("Tanyakan sesuatu ke AI (Contoh: 'halo', 'bod', 'cod', atau 'rekap'):", key="chat_input_unique")
         if chat_in:
             st.chat_message("assistant").write(ai_chatbot_brain(chat_in))
 
-    # KOLOM KANAN (col_a2): Form Mengajar Standar SOP & Ringkasan JSON Memori
     with col_a2:
         st.write("**Penyimpanan Modul Pengetahuan Baru**")
         topik = st.text_input("Topik atau Kata Kunci Baru:").lower().strip()
