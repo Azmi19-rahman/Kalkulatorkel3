@@ -3,8 +3,8 @@ import numpy as np
 import sqlite3
 
 # ==============================================================================
-# PROYEK: ISIS v3.3 - REPOSISI KONTEN TAB AI & CHATBOT CASUAL
-# Sidebar: Daftar Cepat Sampel | Konten Utama: Form Mutu & AI Bestie Style
+# PROYEK: ISIS v3.4 - FIX POSISI CHAT DI SEBELAH KIRI (TAB AI)
+# Sidebar: Daftar Cepat Sampel | Konten Utama: Chat di Kiri, Form Input di Kanan
 # ==============================================================================
 
 st.set_page_config(page_title="Water Quality Analytics System", page_icon="💧", layout="wide")
@@ -157,13 +157,13 @@ def ai_chatbot_brain(pertanyaan):
             respons += "Aman jaya! Sejauh ini belum ada sampel yang melebihi ambang batas regulasi lingkungan."
         return respons
         
-    return "Mmm, pola teks atau keyword materi itu belum ketemu di sel otak database-ku nih. Coba ajarkan aku dulu di form sebelah kiri supaya aku ingat selamanya!"
+    return "Mmm, pola teks atau keyword materi itu belum ketemu di sel otak database-ku nih. Coba ajarkan aku dulu di form sebelah kanan supaya aku ingat selamanya!"
 
 
 # ==============================================================================
 # 💻 TAMPILAN FRONTEND WEB STREAMLIT
 # ==============================================================================
-st.title("💧 ISIS v3.3: Water Quality Perhitungan & Evaluasi Data Kimia")
+st.title("💧 ISIS v3.4: Water Quality Perhitungan & Evaluasi Data Kimia")
 st.caption("Sistem Analisis Parameter BOD & COD Laboratorium Lingkungan dengan Database Fisik SQLite")
 st.markdown("---")
 
@@ -258,13 +258,20 @@ with tab_riwayat:
     else:
         st.caption("Belum ada riwayat pengujian sampel air yang tersimpan di harddisk laptop.")
 
-# --- TAB 3: OTAK AI & KNOWLEDGE LAB (POSISI SUDAH TERTUKAR KIRI-KANAN) ---
+# --- TAB 3: OTAK AI & KNOWLEDGE LAB (FIX POSISI CHAT DI SEBELAH KIRI) ---
 with tab_ai:
     st.header("🧠 Long-Term Memory & Pengetahuan AI")
     col_a1, col_a2 = st.columns(2)
     
-    # 🌟 SEKARANG DI KIRI (col_a1): Form Ajarkan Ilmu Baru & JSON Database Otak
+    # 🌟 SEKARANG DI SEBELAH KIRI (col_a1): Room Konsultasi / Ruang Chat Bersama AI
     with col_a1:
+        st.subheader("💬 Konsultasi Mutu Air Bersama AI")
+        chat_in = st.text_input("Tanyakan sesuatu ke AI (Contoh: 'halo', 'bod', 'cod', atau 'rekap'):")
+        if chat_in:
+            st.chat_message("assistant").write(ai_chatbot_brain(chat_in))
+
+    # 🌟 SEKARANG DI SEBELAH KANAN (col_a2): Form Ajarkan Ilmu Baru & JSON Database Otak
+    with col_a2:
         st.subheader("📖 Ajarkan Standar Baku/SOP Air Baru")
         topik = st.text_input("Topik/Kata Kunci Baru:").lower().strip()
         penjelasan = st.text_area("Narasi SOP / Penjelasan Ilmiah:")
@@ -275,10 +282,3 @@ with tab_ai:
                 st.rerun()
         st.subheader("📚 Daftar Isi Otak AI Saat Ini")
         st.json(get_ai_knowledge())
-
-    # 🌟 SEKARANG DI KANAN (col_a2): Room Konsultasi / Obrolan Chat Bersama AI
-    with col_a2:
-        st.subheader("💬 Konsultasi Mutu Air Bersama AI")
-        chat_in = st.text_input("Tanyakan sesuatu ke AI (Contoh: 'halo', 'bod', 'cod', atau 'rekap'):")
-        if chat_in:
-            st.chat_message("assistant").write(ai_chatbot_brain(chat_in))
