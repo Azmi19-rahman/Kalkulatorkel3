@@ -166,20 +166,19 @@ def ai_chatbot_brain(pertanyaan):
 # ==============================================================================
 
 # --- KOLOM 1: SIDEBAR (NAVIGASI) ---
-# Tampilan sidebar disesuaikan agar formal dengan logo emoji
 with st.sidebar:
     st.subheader("💧 Water Quality System")
     st.write("Politeknik AKA Bogor")
     st.markdown("---")
     
-    # 🌟 SISTEM NAVIGASI SIDEBAR: Menggunakan Radio Button, mengikuti referensi
+    # 🌟 SISTEM NAVIGASI SIDEBAR: Radio Button persis seperti menu screenshot referensi
     pilih_fitur = st.radio(
         "Pilih Fitur:",
         ["Beranda", "Perhitungan BOD/COD", "Database Riwayat Sampel", "Inteligensia & Konsultasi AI"]
     )
     st.markdown("---")
     
-    # Bagian Metrics Ringkasan di sidebar, modern & informatif
+    # Bagian Ringkasan Data Cepat di bawah Menu Navigasi
     st.subheader("Ringkasan Data Lab")
     logs_saat_ini = get_water_logs()
     total_data = len(logs_saat_ini)
@@ -189,9 +188,9 @@ with st.sidebar:
     st.metric("Sampel Melebihi Ambang", f"{total_tercemar} Sampel", delta=f"+{total_tercemar}" if total_tercemar > 0 else "0", delta_color="inverse")
 
 
-# --- KOLOM 2: KONTEN UTAMA (MENGIKUTI PILIHAN SIDEBAR) ---
+# --- KOLOM 2: KONTEN UTAMA (BERUBAH SESUAI PILIHAN SIDEBAR) ---
 
-# 🏠 1. HALAMAN BERANDA (MIMIK REFERENSI)
+# 🏠 MENU 1: BERANDA
 if pilih_fitur == "Beranda":
     st.title("💧 Water Quality System")
     st.caption("Selamat Datang di Aplikasi Analisis Kualitas Air Laboratorium Lingkungan")
@@ -200,32 +199,28 @@ if pilih_fitur == "Beranda":
     col_ref1, col_ref2 = st.columns([1.5, 1])
     
     with col_ref1:
-        # Tujuan Aplikasi dibuat dalam bentuk paragraf kontinu, formal
         st.subheader("🎯 Tujuan Aplikasi")
         st.write("""
         Aplikasi ini dirancang sebagai solusi terintegrasi untuk membantu laboran dan analis kimia dalam memproses data kualitas air, khususnya parameter Biochemical Oxygen Demand (BOD) dan Chemical Oxygen Demand (COD). Sistem ini bertujuan untuk mengotomatisasi kalkulasi rumus kimia yang rumit, menjamin penyimpanan rekam data riwayat sampel secara permanen di database fisik, serta menyediakan modul evaluasi berbasis kecerdasan buatan (AI) yang siap pakai.
         """)
         
     with col_ref2:
-        # Manfaat Aplikasi juga berbentuk paragraf kontinu
         st.subheader("📚 Manfaat Aplikasi")
         st.write("""
         Dengan menggunakan aplikasi ini, laboran dapat meminimalkan risiko 'human error' atau galat matematis saat perhitungan desimal bertingkat. Selain itu, integrasi database SQLite memastikan kepatuhan terhadap prinsip 'data integrity' lab lingkungan. Fitur chatbot komputasi AI juga mempercepat penyusunan narasi pembahasan hasil uji, menjadikan alur kerja laboratorium menjadi lebih cepat, akurat, dan terstandarisasi.
         """)
         
     st.markdown("---")
-    # Tampilkan JSON Pengetahuan AI di Beranda sebagai "Daftar Pengetahuan Sistem"
     st.subheader("📚 Daftar Pengetahuan Sistem Saat Ini")
     st.json(get_ai_knowledge())
 
 
-# 🧮 2. HALAMAN PERHITUNGAN BOD/COD
+# 🧮 MENU 2: PERHITUNGAN BOD/COD
 elif pilih_fitur == "Perhitungan BOD/COD":
-    st.title("🧮 Input Hasil Analisis Laboratorium")
-    st.caption("Gunakan form ini untuk menghitung dan menyimpan data analisis kimia air")
+    st.title("🧮 Perhitungan Parameter Kimia Air")
+    st.caption("Gunakan form ini untuk melakukan kalkulasi data mentah laboratorium")
     st.markdown("---")
     
-    # Pengaturan Standar Mutu ditaruh di atas form
     col_mutu1, col_mutu2 = st.columns(2)
     with col_mutu1:
         bod_max = st.number_input("Batas Maks Baku Mutu BOD (mg/L):", value=6.0000, step=0.5000, format="%.4f")
@@ -250,12 +245,82 @@ elif pilih_fitur == "Perhitungan BOD/COD":
                 status = "MEMENUHI SYARAT" if hasil <= bod_max else "MELEBIHI AMBANG"
                 biner_id = desimal_ke_biner(len(get_water_logs()) + 1)
                 
-                # Keterangan yang mudah dipahami manusia
-                ket_singkat = f"Diukur dengan DO awal {do_0} mg/L dan DO akhir {do_5} mg/L melalui faktor pengenceran {f_pengenceran} kali."
+                ket_singkat = f"DO0={do_0}, DO5={do_5}, P={f_pengenceran}"
                 
                 save_water_log(biner_id, nama_smpl, "BOD", hasil, status, ket_singkat)
                 st.session_state["pembahasan_ai"] = ai_water_evaluation({"id_biner": biner_id, "parameter": "BOD", "nilai": hasil, "status": status}, bod_max)
                 st.rerun()
                 
         elif "COD" in sub_metode:
-            st.caption("Metode Refluks Terbuka / Titrasi dengan Larutan FAS
+            st.caption("Metode Refluks Terbuka / Titrasi dengan Larutan FAS")
+            v_blanko = st.number_input("Volume Penitran Blanko (mL):", value=15.20, format="%.2f")
+            v_sampel = st.number_input("Volume Penitran Sampel Air (mL):", value=13.60, format="%.2f")
+            n_fas = st.number_input("Normalitas Larutan FAS (N):", value=0.1000, format="%.4f")
+            vol_air = st.number_input("Volume Sampel Air Teruji (mL):", value=50.00, format="%.2f")
+            
+            if st.button("Hitung & Simpan Data"):
+                hasil = hitung_cod(v_blanko, v_sampel, n_fas, vol_air)
+                status = "MEMENUHI SYARAT" if hasil <= cod_max else "MELEBIHI AMBANG"
+                biner_id = desimal_ke_biner(len(get_water_logs()) + 1)
+                
+                ket_singkat = f"V_B={v_blanko}, V_S={v_sampel}, N_FAS={n_fas}"
+                
+                save_water_log(biner_id, nama_smpl, "COD", hasil, status, ket_singkat)
+                st.session_state["pembahasan_ai"] = ai_water_evaluation({"id_biner": biner_id, "parameter": "COD", "nilai": hasil, "status": status}, cod_max)
+                st.rerun()
+
+    with col_l2:
+        st.subheader("Bab 3: Pembahasan Evaluasi AI")
+        if "pembahasan_ai" in st.session_state:
+            st.info(st.session_state["pembahasan_ai"])
+        else:
+            st.caption("Sistem akan memunculkan narasi pembahasan otomatis di sini setelah kalkulasi selesai.")
+
+
+# 📊 MENU 3: DATABASE RIWAYAT SAMPEL
+elif pilih_fitur == "Database Riwayat Sampel":
+    st.title("📊 Rekam Data Kualitas Air Permanen")
+    st.caption("Seluruh riwayat pengujian sampel tersimpan dengan aman di database fisik harddisk")
+    st.markdown("---")
+    
+    if logs_saat_ini:
+        st.table(logs_saat_ini)
+        
+        set_semua = {d["sampel"] for d in logs_saat_ini}
+        set_tercemar = {d["sampel"] for d in logs_saat_ini if d["status"] == "MELEBIHI AMBANG"}
+        
+        st.subheader("Analisis Set Laboratorium")
+        st.write(f"**Set Lokasi Tercemar (Melebihi Ambang):** {set_tercemar if set_tercemar else 'Tidak ada'}")
+        st.write(f"**Set Lokasi Aman Bersih (Lolos Syarat):** {set_semua.difference(set_tercemar) if set_semua.difference(set_tercemar) else 'Tidak ada'}")
+        
+        st.markdown("---")
+        if st.button("Kosongkan Seluruh Riwayat Database"):
+            clear_water_logs()
+            st.rerun()
+    else:
+        st.caption("Belum ada riwayat pengujian sampel air yang tersimpan di harddisk komputer.")
+
+
+# 🧠 MENU 4: INTELIGENSIA & KONSULTASI AI
+elif pilih_fitur == "Inteligensia & Konsultasi AI":
+    st.title("🧠 Pusat Kendali Pengetahuan & Konsultasi AI")
+    st.caption("Gunakan fitur ini untuk berdiskusi dengan AI atau memasukkan materi laboratorium baru")
+    st.markdown("---")
+    
+    col_a1, col_a2 = st.columns(2)
+    
+    with col_a1:
+        st.write("**Konsultasi Mutu Air Bersama AI**")
+        chat_in = st.text_input("Tanyakan sesuatu ke AI (Contoh: 'halo', 'bod', 'cod', atau 'rekap'):", key="chat_input_unique")
+        if chat_in:
+            st.chat_message("assistant").write(ai_chatbot_brain(chat_in))
+
+    with col_a2:
+        st.write("**Penyimpanan Modul Pengetahuan Baru**")
+        topik = st.text_input("Topik atau Kata Kunci Baru:").lower().strip()
+        penjelasan = st.text_area("Deskripsi SOP / Penjelasan Ilmiah:")
+        if st.button("Suntikkan Ke Memori Permanen"):
+            if topik and penjelasan:
+                save_ai_knowledge(topik, penjelasan)
+                st.toast("AI berhasil memperbarui database pengetahuan!")
+                st.rerun()
