@@ -3,7 +3,7 @@ import numpy as np
 import sqlite3
 
 # ==============================================================================
-# PROYEK: ISIS  (Pembaruan) - FORMAT KETERANGAN CASUAL & INFORMATIF
+# PROYEK: WATER QUALITY SYSTEM - DESAIN BERSIH, MODERN, DAN FORMAL
 # Layout: Chat AI di Kiri, Manajemen Pengetahuan di Kanan
 # ==============================================================================
 
@@ -33,7 +33,7 @@ def init_db():
         knowledge_awal = [
             ("bod", "BOD (Biochemical Oxygen Demand) merupakan takaran jumlah oksigen terlarut yang diperlukan oleh mikroorganisme untuk mendekomposisi bahan organik dalam air. Semakin tinggi nilai BOD, semakin rendah kualitas oksigen terlarut bagi ekosistem perairan."),
             ("cod", "COD (Chemical Oxygen Demand) adalah jumlah total oksigen yang dibutuhkan untuk mengurai seluruh bahan organik melalui reaksi kimia menggunakan oksidator kuat. Nilai COD umumnya selalu lebih besar daripada BOD."),
-            ("regulasi", "Baku mutu nasional menetapkan batas aman untuk menjaga kelestarian lingkungan. Berdasarkan standar peruntukan kelas air, parameter BOD biasanya berkisar antara 2-12 mg/L and COD berkisar antara 10-80 mg/L.")
+            ("regulasi", "Baku mutu nasional menetapkan batas aman untuk menjaga kelestarian lingkungan. Berdasarkan standar peruntukan kelas air, parameter BOD biasanya berkisar antara 2-12 mg/L dan COD berkisar antara 10-80 mg/L.")
         ]
         cursor.executemany("INSERT OR IGNORE INTO ai_knowledge VALUES (?, ?)", knowledge_awal)
         
@@ -129,14 +129,14 @@ def ai_water_evaluation(data_baru, batas_maks):
 
 # OTAK AI YANG MIRIP CHAT ASISTEN (CASUAL & ADAPTIF)
 def ai_chatbot_brain(pertanyaan):
-    pertanyaan = Ball_raw = pertanyaan.lower().strip()
+    pertanyaan = pertanyaan.lower().strip()
     memori_pengetahuan = get_ai_knowledge()
     database_air = get_water_logs()
     
     if pertanyaan in ["halo", "hai", "p", "test", "halo ai"]:
         return "Sini, masuk! Ada data lab apa yang mau kita beresin bareng hari ini? 💧"
     if pertanyaan in ["kamu siapa", "siapa kamu", "siapa"]:
-        return "Kenalin, aku asisten database AI pribadimu di proyek ISIS. Panggil aja partner lab-mu, siap bantu hitung data kimia anti-error! 🧠🚀"
+        return "Kenalin, aku asisten database AI pribadimu. Panggil aja partner lab-mu, siap bantu hitung data kimia anti-error! 🧠🚀"
     
     for kunci in memori_pengetahuan:
         if kunci in pertanyaan:
@@ -163,7 +163,7 @@ def ai_chatbot_brain(pertanyaan):
 # ==============================================================================
 # TAMPILAN FRONTEND WEB STREAMLIT
 # ==============================================================================
-st.title("ISIS v3.6: Water Quality System")
+st.title("Water Quality Analytics System")
 st.caption("Sistem Analisis Parameter Kualitas Air Laboratorium Lingkungan Terintegrasi Database SQLite")
 st.markdown("---")
 
@@ -209,7 +209,6 @@ with tab_kalkulator:
                 status = "MEMENUHI SYARAT" if hasil <= bod_max else "MELEBIHI AMBANG"
                 biner_id = desimal_ke_biner(len(get_water_logs()) + 1)
                 
-                # REFORMASI TEKS KETERANGAN: Dibuat kalimat deskriptif yang mudah dipahami
                 ket_singkat = f"Diukur dengan DO awal {do_0} mg/L dan DO akhir {do_5} mg/L melalui faktor pengenceran {f_pengenceran} kali."
                 
                 save_water_log(biner_id, nama_smpl, "BOD", hasil, status, ket_singkat)
@@ -228,7 +227,6 @@ with tab_kalkulator:
                 status = "MEMENUHI SYARAT" if hasil <= cod_max else "MELEBIHI AMBANG"
                 biner_id = desimal_ke_biner(len(get_water_logs()) + 1)
                 
-                # REFORMASI TEKS KETERANGAN: Dibuat kalimat deskriptif yang mudah dipahami
                 ket_singkat = f"Hasil titrasi larutan FAS pada volume blanko {v_blanko} mL, volume sampel {v_sampel} mL, dengan normalitas larutan {n_fas} N."
                 
                 save_water_log(biner_id, nama_smpl, "COD", hasil, status, ket_singkat)
