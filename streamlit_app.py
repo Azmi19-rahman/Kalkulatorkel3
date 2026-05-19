@@ -3,8 +3,8 @@ import numpy as np
 import sqlite3
 
 # ==============================================================================
-# PROYEK: ISIS v3.0 - APLIKASI PERHITUNGAN & EVALUASI DATA KUALITAS AIR (BOD & COD)
-# Standar Penyimpanan Permanen SQLite (Anti-Reset) + Evaluasi AI Bentuk Paragraf
+# PROYEK: ISIS v3.2 - KUALITAS AIR DENGAN OTAK AI CASUAL & ADAPTIF
+# Sidebar: Daftar Cepat Sampel | Konten Utama: Form Mutu & AI Bestie Style
 # ==============================================================================
 
 st.set_page_config(page_title="Water Quality Analytics System", page_icon="💧", layout="wide")
@@ -17,31 +17,24 @@ DB_FILE = "isis_water_quality.db"
 def init_db():
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
-    # Tabel Log Mutu Air (BOD/COD)
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS water_log (
-            id_biner TEXT,
-            sampel TEXT,
-            parameter TEXT,
-            nilai REAL,
-            status TEXT,
-            keterangan TEXT
+            id_biner TEXT, sampel TEXT, parameter TEXT, nilai REAL, status TEXT, keterangan TEXT
         )
     """)
-    # Tabel Memori Pengetahuan AI
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS ai_knowledge (
             topik TEXT PRIMARY KEY, penjelasan TEXT
         )
     """)
     
-    # Isi pengetahuan dasar laboratorium air jika masih kosong
+    # Isi pengetahuan dasar dengan gaya yang lebih santai tapi informatif
     cursor.execute("SELECT COUNT(*) FROM ai_knowledge")
     if cursor.fetchone()[0] == 0:
         knowledge_awal = [
-            ("bod", "Biochemical Oxygen Demand adalah jumlah oksigen terlarut yang diperlukan oleh mikroorganisme untuk mengurai bahan organik dalam air."),
-            ("cod", "Chemical Oxygen Demand adalah jumlah oksigen yang dibutuhkan untuk mengurai seluruh bahan organik yang terkandung dalam air melalui reaksi kimiawi."),
-            ("regulasi", "Berdasarkan standar baku mutu air nasional, batas maksimal kadar BOD yang aman berkisar antara 2-12 mg/L tergantung kelas air, sedangkan untuk COD berkisar antara 10-80 mg/L.")
+            ("bod", "BOD atau Biochemical Oxygen Demand itu intinya takaran seberapa banyak oksigen terlarut yang dihabisin sama mikroorganisme pas lagi dekomposisi bahan organik di dalam air. Makin tinggi nilainya, makin megap-megap makhluk hidup di air karena kehabisan oksigen!"),
+            ("cod", "COD atau Chemical Oxygen Demand itu jumlah total oksigen yang dibutuhin buat mengurai semua bahan organik lewat jalur reaksi kimia (pake oksidator kuat). Makanya nilai COD biasanya selalu lebih gede daripada BOD."),
+            ("regulasi", "Baku mutu nasional kita menetapkan batas aman biar lingkungan ga rusak. Biasanya BOD itu maks berkisar 2-12 mg/L dan COD berkisar 10-80 mg/L, tergantung peruntukan kelas airnya.")
         ]
         cursor.executemany("INSERT OR IGNORE INTO ai_knowledge VALUES (?, ?)", knowledge_awal)
         
@@ -102,22 +95,16 @@ def desimal_ke_biner(desimal):
     return biner
 
 def hitung_bod(do_nol, do_lima, pengenceran):
-    """Rumus: BOD (mg/L) = (DO_0 - DO_5) * Faktor Pengenceran"""
-    try:
-        return round((do_nol - do_lima) * pengenceran, 4)
-    except Exception:
-        return None
+    try: return round((do_nol - do_lima) * pengenceran, 4)
+    except Exception: return None
 
 def hitung_cod(vol_blanko, vol_sampel, norm_fas, berat_sampel):
-    """Rumus: COD (mg/L) = ((V_blanko - V_sampel) * N_FAS * 8000) / V_sampel_air"""
-    try:
-        return round(((vol_blanko - vol_sampel) * norm_fas * 8000) / berat_sampel, 4)
-    except ZeroDivisionError:
-        return None
+    try: return round(((vol_blanko - vol_sampel) * norm_fas * 8000) / berat_sampel, 4)
+    except ZeroDivisionError: return None
 
 
 # ==============================================================================
-# 🧠 LOGIKA EVALUASI AI (FORMAT PARAGRAF MENGALIR - BUKAN POIN)
+# 🧠 LOGIKA EVALUASI AI (FORMAT PARAGRAF KONTINU)
 # ==============================================================================
 def ai_water_evaluation(data_baru, batas_maks):
     logs = get_water_logs()
@@ -141,44 +128,75 @@ def ai_water_evaluation(data_baru, batas_maks):
         
     return pembahasan
 
+# 🧠 OTAK AI YANG MIRIP CHAT ASISTEN (AUTHENTIC & WITTY)
 def ai_chatbot_brain(pertanyaan):
-    pertanyaan = pertanyaan.lower()
+    pertanyaan = pertanyaan.lower().strip()
     memori_pengetahuan = get_ai_knowledge()
     database_air = get_water_logs()
     
+    # Respons obrolan kasual pembuka
+    if pertanyaan in ["halo", "hai", "p", "test", "halo ai"]:
+        return "Sini, masuk! Ada data lab apa yang mau kita beresin bareng hari ini? 💧"
+    if pertanyaan in ["kamu siapa", "siapa kamu", "siapa"]:
+        return "Kenalin, aku asisten database AI pribadimu di proyek ISIS. Panggil aja partner lab-mu, siap bantu hitung data kimia anti-error! 🧠🚀"
+    
+    # Cek kecocokan materi di database jangka panjang
     for kunci in memori_pengetahuan:
         if kunci in pertanyaan:
-            return f"🤖 **[MEMORI JANGKA PANJANG AI]:** {memori_pengetahuan[kunci]}"
+            return f"🧠 **[Long-Term Memory]:** Nah, kalau soal *{kunci}*, ingatan databaseku mencatat: {memori_pengetahuan[kunci]}"
             
+    # Laporan data historis dengan gaya santai
     if "rekap" in pertanyaan or "evaluasi" in pertanyaan or "total" in pertanyaan:
         if not database_air: 
-            return "🤖 Database analisis kualitas air saat ini masih kosong."
+            return "Waduh, database analisis kualitas air di harddisk laptopmu masih kosong melompong nih. Yuk, coba hitung dan simpan satu sampel dulu!"
+        
         total = len(database_air)
         reject = sum(1 for d in database_air if d["status"] == "MELEBIHI AMBANG")
-        return f"🤖 **[LAPORAN HISTORIS DATABASE]:** Total pengujian kualitas air yang terekam di harddisk komputer secara permanen saat ini berjumlah {total} sampel, di mana terdapat {reject} sampel yang terdeteksi melebihi ambang batas baku mutu regulasi industri."
         
-    return "🤖 Pola teks materi kualitas air ini belum ada di database ingatan saya. Silakan ajarkan instruksi baru pada form di samping agar saya ingat selamanya!"
+        respons = f"📊 **[Database Report]:** Oke, mari kita cek isi harddisk! Total riwayat pengujian yang berhasil tersimpan ada **{total} sampel**. "
+        if reject > 0:
+            respons += f"Tapi awas nih, ada **{reject} sampel yang ambang batasnya jebol (merah)**. Butuh perhatian ekstra di unit pengolahan limbahnya ya!"
+        else:
+            respons += "Aman jaya! Sejauh ini belum ada sampel yang melebihi ambang batas regulasi lingkungan."
+        return respons
+        
+    return "Mmm, pola teks atau keyword materi itu belum ketemu di sel otak database-ku nih. Coba ajarkan aku dulu di form sebelah kiri supaya aku ingat selamanya!"
 
 
 # ==============================================================================
 # 💻 TAMPILAN FRONTEND WEB STREAMLIT
 # ==============================================================================
-st.title("💧 ISIS v3.0: Water Quality Perhitungan & Evaluasi Data Kimia")
+st.title("💧 ISIS v3.2: Water Quality Perhitungan & Evaluasi Data Kimia")
 st.caption("Sistem Analisis Parameter BOD & COD Laboratorium Lingkungan dengan Database Fisik SQLite")
 st.markdown("---")
 
-# Sidebar Baku Mutu Air (Berdasarkan Peraturan Regulasi)
-st.sidebar.header("⚙️ Baku Mutu Air Nasional")
-bod_max = st.sidebar.number_input("Batas Maks BOD (mg/L)", value=6.0000, step=0.5000, format="%.4f")
-cod_max = st.sidebar.number_input("Batas Maks COD (mg/L)", value=25.0000, step=1.0000, format="%.4f")
+# Ambil data logs terbaru untuk list sidebar
+logs_saat_ini = get_water_logs()
 
+# 📋 SIDEBAR KIRI: DAFTAR CEPAT SAMPEL TERDAFTAR
+st.sidebar.header("📋 Sampel Terdaftar")
+if logs_saat_ini:
+    for idx, log in enumerate(logs_saat_ini):
+        icon_status = "🟢" if log["status"] == "MEMENUHI SYARAT" else "🔴"
+        st.sidebar.write(f"{idx+1}. {icon_status} **{log['sampel']}** ({log['parameter']})")
+else:
+    st.sidebar.caption("Belum ada sampel yang terdaftar.")
+
+# --- KONTEN UTAMA ---
 tab_kalkulator, tab_riwayat, tab_ai = st.tabs(["🧮 1. Perhitungan BOD/COD", "📋 2. Database Riwayat Sampel", "🧠 3. Inteligensia & Konsultasi AI"])
 
 # --- TAB 1: PERHITUNGAN BOD & COD ---
 with tab_kalkulator:
     st.header("🧮 Input Data Analisis Kimia Air")
-    sub_metode = st.selectbox("Pilih Parameter Analisis Air:", ["BOD (Biochemical Oxygen Demand)", "COD (Chemical Oxygen Demand)"])
     
+    col_mutu1, col_mutu2 = st.columns(2)
+    with col_mutu1:
+        bod_max = st.number_input("Batas Maks Baku Mutu BOD (mg/L):", value=6.0000, step=0.5000, format="%.4f")
+    with col_mutu2:
+        cod_max = st.number_input("Batas Maks Baku Mutu COD (mg/L):", value=25.0000, step=1.0000, format="%.4f")
+    st.markdown("---")
+    
+    sub_metode = st.selectbox("Pilih Parameter Analisis Air:", ["BOD (Biochemical Oxygen Demand)", "COD (Chemical Oxygen Demand)"])
     col_l1, col_l2 = st.columns([1.4, 1.2])
     
     with col_l1:
@@ -195,11 +213,8 @@ with tab_kalkulator:
                 status = "MEMENUHI SYARAT" if hasil <= bod_max else "MELEBIHI AMBANG"
                 biner_id = desimal_ke_biner(len(get_water_logs()) + 1)
                 
-                # Buat keterangan ringkas untuk tabel database
                 ket_singkat = f"DO0={do_0}, DO5={do_5}, P={f_pengenceran}"
                 save_water_log(biner_id, nama_smpl, "BOD", hasil, status, ket_singkat)
-                
-                # Simpan laporan evaluasi ke session state sementara agar langsung tampil di kolom kanan
                 st.session_state["pembahasan_ai"] = ai_water_evaluation({"id_biner": biner_id, "parameter": "BOD", "nilai": hasil, "status": status}, bod_max)
                 st.rerun()
                 
@@ -217,7 +232,6 @@ with tab_kalkulator:
                 
                 ket_singkat = f"V_B={v_blanko}, V_S={v_sampel}, N_FAS={n_fas}"
                 save_water_log(biner_id, nama_smpl, "COD", hasil, status, ket_singkat)
-                
                 st.session_state["pembahasan_ai"] = ai_water_evaluation({"id_biner": biner_id, "parameter": "COD", "nilai": hasil, "status": status}, cod_max)
                 st.rerun()
 
@@ -231,14 +245,11 @@ with tab_kalkulator:
 # --- TAB 2: DATABASE RIWAYAT SAMPEL ---
 with tab_riwayat:
     st.header("📋 Rekam Data Kualitas Air Permanen")
-    logs_air = get_water_logs()
-    
-    if logs_air:
-        st.table(logs_air)
+    if logs_saat_ini:
+        st.table(logs_saat_ini)
         
-        # Implementasi Matematika Himpunan / Set (Materi Bab V)
-        set_semua = {d["sampel"] for d in logs_air}
-        set_tercemar = {d["sampel"] for d in logs_air if d["status"] == "MELEBIHI AMBANG"}
+        set_semua = {d["sampel"] for d in logs_saat_ini}
+        set_tercemar = {d["sampel"] for d in logs_saat_ini if d["status"] == "MELEBIHI AMBANG"}
         
         st.markdown("---")
         st.subheader("📊 Analisis Set Laboratorium")
@@ -246,12 +257,11 @@ with tab_riwayat:
         st.write(f"✅ **Set Lokasi Aman Bersih (Lolos Syarat):** {set_semua.difference(set_tercemar) if set_semua.difference(set_tercemar) else 'Tidak ada'}")
         
         if st.button("Kosongkan Seluruh Database Riwayat Air"):
-            clear_water_logs()
-            st.rerun()
+            clear_water_logs(); st.rerun()
     else:
         st.caption("Belum ada riwayat pengujian sampel air yang tersimpan di harddisk laptop.")
 
-# --- TAB 3: OTTAK AI & KNOWLEDGE LAB ---
+# --- TAB 3: OTAK AI & KNOWLEDGE LAB ---
 with tab_ai:
     st.header("🧠 Long-Term Memory & Pengetahuan AI")
     col_a1, col_a2 = st.columns(2)
@@ -260,18 +270,16 @@ with tab_ai:
         st.subheader("📖 Ajarkan Standar Baku/SOP Air Baru")
         topik = st.text_input("Topik/Kata Kunci Baru:").lower().strip()
         penjelasan = st.text_area("Narasi SOP / Penjelasan Ilmiah:")
-        
         if st.button("Suntikkan Ke Memori Permanen AI"):
             if topik and penjelasan:
                 save_ai_knowledge(topik, penjelasan)
                 st.toast("AI berhasil menyimpan ilmu baru tersebut ke harddisk!")
                 st.rerun()
-                
         st.subheader("📚 Daftar Isi Otak AI Saat Ini")
         st.json(get_ai_knowledge())
 
     with col_a2:
         st.subheader("💬 Konsultasi Mutu Air Bersama AI")
-        chat_in = st.text_input("Tanyakan sesuatu ke AI (Contoh: 'bod', 'cod', atau 'rekap'):")
+        chat_in = st.text_input("Tanyakan sesuatu ke AI (Contoh: 'halo', 'bod', 'cod', atau 'rekap'):")
         if chat_in:
             st.chat_message("assistant").write(ai_chatbot_brain(chat_in))
