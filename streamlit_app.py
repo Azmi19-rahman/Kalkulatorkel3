@@ -1,30 +1,15 @@
 import streamlit as st
 import numpy as np
 import sqlite3
-import base64
-import os
 
 # ==============================================================================
-# PROYEK: WATER QUALITY ANALYTICS SYSTEM (CUSTOM IMAGE ANIMATED EDITION)
+# PROYEK: WATER QUALITY ANALYTICS SYSTEM (ANIMATED DIGITAL WATER EDITION)
+# Tampilan UI Interaktif dengan Efek Animasi Matrix Water Flow Global
 # ==============================================================================
 
 st.set_page_config(page_title="Water Quality Analytics System", page_icon="💧", layout="wide")
 
 DB_FILE = "isis_water_quality.db"
-
-# ==============================================================================
-# 🖼️ FUNGSI ENKROPSI GAMBAR BACKGROUND KE BASE64
-# ==============================================================================
-def get_base64_image(image_path):
-    # Memastikan file gambar ada di folder project
-    if os.path.exists(image_path):
-        with open(image_path, "rb") as img_file:
-            return base64.b64encode(img_file.read()).decode()
-    return ""
-
-# Taruh gambar lab kamu di folder yang sama dengan app.py, beri nama 'bg_lab.png'
-# Jika formatnya .jpg atau .jpeg, silakan ganti nama file di bawah ini.
-img_base64 = get_base64_image("bg_lab.png")
 
 # ==============================================================================
 # 🗃️ INISIALISASI DATABASE FISIK (SQLITE)
@@ -156,7 +141,7 @@ def ai_water_evaluation(data_baru, batas_acuan, parameter_nama, tipe_ambang="mak
     return pembahasan
 
 def ai_chatbot_brain(pertanyaan):
-    pertanyaan = presidential_speech = pertanyaan.lower().strip()
+    pertanyaan = pertanyaan.lower().strip()
     memori_pengetahuan = get_ai_knowledge()
     database_air = get_water_logs()
     
@@ -188,149 +173,139 @@ def ai_chatbot_brain(pertanyaan):
 
 
 # ==============================================================================
-# 📱 FRONTEND & SUNTIKAN INTEGRASI BACKGROUND ASLI DAN ANIMASI LEMBUT
+# 📱 FRONTEND & SUNTIKAN ANIMASI BACKGROUND JAVASCRIPT / CSS GLOBAL
 # ==============================================================================
 
-# 🌌 1. Injeksi Canvas HTML5 untuk Efek Animasi Gelembung Mikro Naik Lembut di Atas Background
+# 🌌 1. Injeksi Canvas HTML5 untuk Efek Digital Water Rain
 st.markdown("""
-    <canvas id="customLabCanvas" style="position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:-1; pointer-events:none; opacity:0.5;"></canvas>
+    <canvas id="waterCanvas" style="position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:-1; pointer-events:none; opacity:0.12;"></canvas>
     <script>
-    const canvas = document.getElementById('customLabCanvas');
+    const canvas = document.getElementById('waterCanvas');
     const ctx = canvas.getContext('2d');
 
-    function resize() {
+    function resizeCanvas() {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
     }
-    window.addEventListener('resize', resize);
-    resize();
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
 
-    const dots = [];
-    for(let i=0; i<20; i++) {
-        dots.push({
-            x: Math.random() * canvas.width,
-            y: canvas.height + Math.random() * 100,
-            r: Math.random() * 4 + 2,
-            v: Math.random() * 0.8 + 0.3,
-            op: Math.random() * 0.3 + 0.1
-        });
+    const katakana = '💧01';
+    const alphabet = katakana.split('');
+
+    const fontSize = 16;
+    const columns = canvas.width / fontSize;
+
+    const rainDrops = [];
+    for (let x = 0; x < columns; x++) {
+        rainDrops[x] = 1;
     }
 
     function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        dots.forEach(d => {
-            d.y -= d.v;
-            if(d.y < -10) {
-                d.y = canvas.height + 10;
-                d.x = Math.random() * canvas.width;
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.05)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = '#00f2fe';
+        ctx.font = fontSize + 'px monospace';
+
+        for (let i = 0; i < rainDrops.length; i++) {
+            const text = alphabet[Math.floor(Math.random() * alphabet.length)];
+            ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
+
+            if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                rainDrops[i] = 0;
             }
-            ctx.beginPath();
-            ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(100, 180, 255, ${d.op})`;
-            ctx.fill();
-        });
-        requestAnimationFrame(draw);
+            rainDrops[i]++;
+        }
     }
-    draw();
+    setInterval(draw, 35);
     </script>
 """, unsafe_allow_html=True)
 
-# 🎨 2. CSS Kustom untuk Pasang Gambar Kamu Jadi Background Utama & Efek Glassmorphism
-if img_base64:
-    # Jika gambar berhasil diload dari folder lokal
-    bg_style = f"""
-    background: linear-gradient(135deg, rgba(255,255,255,0.75) 0%, rgba(240,247,255,0.8) 100%), 
-                url('data:image/png;base64,{img_base64}') no-repeat center center fixed;
-    background-size: cover;
-    """
-else:
-    # Fallback jika kamu belum menaruh gambar bg_lab.png di folder
-    bg_style = """
-    background: linear-gradient(135deg, #ffffff 0%, #e6f2ff 100%);
-    """
-
-st.markdown(f"""
+# 🎨 2. Kustomisasi Gaya CSS Tema Gelap & Efek Transisi Hover
+st.markdown("""
     <style>
-    /* Pasang background custom */
-    .stApp {{
-        {bg_style}
-        color: #1e293b !important;
-    }}
+    /* Mengubah Background Dasar Aplikasi */
+    .stApp {
+        background: radial-gradient(circle at top right, #1e1e38, #0f172a 60%, #080c14);
+        color: #f8fafc !important;
+    }
     
-    [data-testid="stSidebar"] {{
-        background: rgba(248, 250, 252, 0.55) !important;
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border-right: 1px solid rgba(203, 213, 225, 0.5);
-    }}
+    /* Mengubah Tampilan Panel Navigasi Sidebar */
+    [data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #090d16 0%, #0f172a 100%) !important;
+        border-right: 2px solid #1e293b;
+    }
     
-    .main-title {{
-        font-size: 38px;
+    /* Animasi Judul Utama */
+    .main-title {
+        font-size: 40px;
         font-weight: 800;
-        background: linear-gradient(45deg, #0284c7, #1e40af);
+        background: linear-gradient(45deg, #00f2fe, #4facfe, #00f2fe);
+        background-size: 200% auto;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-    }}
+        animation: shine 4s linear infinite;
+        margin-bottom: 5px;
+    }
+    @keyframes shine {
+        to { background-position: 200% center; }
+    }
     
-    /* EFEK KACA (GLASSMORPHISM) BERSIH SUPAYA GAMBAR KAMU TEMBUS KE DEPAN */
-    .card-box-1 {{
-        background: rgba(255, 255, 255, 0.55);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
+    /* Desain Kartu Box Kustom dengan Efek Transisi Lembut saat di-Hover */
+    .card-box-1 {
+        background-color: rgba(14, 165, 233, 0.1);
         padding: 22px;
-        border-radius: 14px;
-        border: 1px solid rgba(14, 165, 233, 0.2);
+        border-radius: 12px;
+        border: 1px solid rgba(14, 165, 233, 0.3);
         border-left: 6px solid #0284c7;
-        color: #1e293b;
+        color: #e0f2fe;
         margin-bottom: 15px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.03);
-    }}
+        transition: all 0.3s ease;
+    }
+    .card-box-1:hover {
+        transform: translateY(-3px);
+        background-color: rgba(14, 165, 233, 0.18);
+        box-shadow: 0 8px 20px rgba(2, 132, 199, 0.2);
+    }
     
-    .card-box-2 {{
-        background: rgba(255, 255, 255, 0.55);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
+    .card-box-2 {
+        background-color: rgba(34, 197, 94, 0.1);
         padding: 22px;
-        border-radius: 14px;
-        border: 1px solid rgba(22, 163, 74, 0.2);
+        border-radius: 12px;
+        border: 1px solid rgba(34, 197, 94, 0.3);
         border-left: 6px solid #16a34a;
-        color: #1e293b;
+        color: #dcfce7;
         margin-bottom: 15px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.03);
-    }}
+        transition: all 0.3s ease;
+    }
+    .card-box-2:hover {
+        transform: translateY(-3px);
+        background-color: rgba(34, 197, 94, 0.18);
+        box-shadow: 0 8px 20px rgba(22, 163, 74, 0.2);
+    }
     
-    .section-head {{
-        color: #0369a1;
+    /* Penyelarasan Judul Seksi */
+    .section-head {
+        color: #38bdf8;
         font-weight: bold;
-        border-bottom: 2px solid rgba(203, 213, 225, 0.6);
+        border-bottom: 2px solid #1e293b;
         padding-bottom: 5px;
         margin-top: 15px;
-    }}
+    }
     
-    label, p, span, div {{
-        color: #334155 !important;
-    }}
-    h1, h2, h3, h4, h5, h6 {{
-        color: #0f172a !important;
-    }}
-    
-    /* Ganti desain tombol input bawaan Streamlit agar serasi dengan watercolor biru */
-    .stButton>button {{
-        background: linear-gradient(45deg, #0284c7, #2563eb) !important;
-        color: white !important;
-        border-radius: 8px !important;
-        border: none !important;
-        font-weight: 600 !important;
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2) !important;
-    }}
+    /* Pengaturan Global Warna Teks Default Label */
+    label, p, span {
+        color: #e2e8f0 !important;
+    }
     </style>
 """, unsafe_allow_html=True)
 
 
 # --- KOLOM 1: SIDEBAR (NAVIGASI) ---
 with st.sidebar:
-    st.markdown("<h2 style='color: #0284c7; margin-bottom: 0px; font-weight:800;'>💧 Water Quality</h2>", unsafe_allow_html=True)
-    st.markdown("<p style='font-style: italic; color: #64748b; margin-top:0px;'>Politeknik AKA Bogor</p>", unsafe_allow_html=True)
+    st.markdown("<h2 style='color: #38bdf8; margin-bottom: 0px; font-weight:800;'>💧 Water Quality</h2>", unsafe_allow_html=True)
+    st.markdown("<p style='font-style: italic; color: #94a3b8; margin-top:0px;'>Politeknik AKA Bogor</p>", unsafe_allow_html=True)
     st.markdown("---")
     
     pilih_fitur = st.radio(
@@ -347,7 +322,7 @@ with st.sidebar:
     )
     st.markdown("---")
     
-    st.markdown("<h4 style='color: #0284c7;'>📊 Ringkasan Live Lab</h4>", unsafe_allow_html=True)
+    st.markdown("<h4 style='color: #38bdf8;'>📊 Ringkasan Live Lab</h4>", unsafe_allow_html=True)
     logs_saat_ini = get_water_logs()
     total_data = len(logs_saat_ini)
     total_bermasalah = sum(1 for d in logs_saat_ini if d["status"] in ["MELEBIHI AMBANG", "DI BAWAH MINIMUM"])
@@ -368,7 +343,7 @@ if pilih_fitur == "Beranda":
     with col_ref1:
         st.markdown("""
             <div class='card-box-1'>
-                <h3 style='color: #0284c7; margin-top:0px;'>🎯 Tujuan Aplikasi</h3>
+                <h3 style='color: #38bdf8; margin-top:0px;'>🎯 Tujuan Aplikasi</h3>
                 <p>Aplikasi ini dirancang sebagai solusi digital terintegrasi untuk mendampingi laboran serta analis kimia dalam memproses pengujian parameter kualitas air (BOD, COD, TSS, dan DO). Sistem mengotomatisasi kalkulasi bertingkat untuk mengeliminasi faktor galat manusia, sekaligus mengamankan penyimpanan data ke memori fisik komputer secara real-time.</p>
             </div>
         """, unsafe_allow_html=True)
@@ -376,7 +351,7 @@ if pilih_fitur == "Beranda":
     with col_ref2:
         st.markdown("""
             <div class='card-box-2'>
-                <h3 style='color: #16a34a; margin-top:0px;'>📚 Manfaat Aplikasi</h3>
+                <h3 style='color: #4ade80; margin-top:0px;'>📚 Manfaat Aplikasi</h3>
                 <p>Lewat integrasi basis data SQLite, kepatuhan validitas pengujian dan prinsip 'data integrity' laboratorium lingkungan tetap terjaga penuh. Didukung modul evaluasi otomatis berbasis kecerdasan buatan (AI), proses penyusunan narasi Bab 3 Pembahasan laporan praktikum atau kerja industri menjadi jauh lebih cepat, terstruktur, dan akurat.</p>
             </div>
         """, unsafe_allow_html=True)
@@ -387,7 +362,7 @@ if pilih_fitur == "Beranda":
 
 # 🧪 MENU 2: PERHITUNGAN BOD
 elif pilih_fitur == "Perhitungan BOD":
-    st.markdown("<h1 style='color: #0284c7;'>🧪 Input Analisis Parameter BOD</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='color: #38bdf8;'>🧪 Input Analisis Parameter BOD</h1>", unsafe_allow_html=True)
     st.caption("Metode Titrasi Iodometri (Winkler) / DO Meter pasca Inkubasi 5 Hari")
     st.markdown("---")
     
@@ -414,7 +389,7 @@ elif pilih_fitur == "Perhitungan BOD":
             st.rerun()
 
     with col_l2:
-        st.markdown("<h3 style='color: #0284c7;'>🧐 Hasil & Pembahasan AI</h3>", unsafe_allow_html=True)
+        st.markdown("<h3 style='color: #38bdf8;'>🧐 Hasil & Pembahasan AI</h3>", unsafe_allow_html=True)
         if "pembahasan_bod" in st.session_state:
             if st.session_state["status_bod"] == "MEMENUHI SYARAT":
                 st.success(f"🎉 HASIL: {st.session_state['nilai_bod']:.4f} mg/L ({st.session_state['status_bod']})")
@@ -427,7 +402,7 @@ elif pilih_fitur == "Perhitungan BOD":
 
 # 🧪 MENU 3: PERHITUNGAN COD
 elif pilih_fitur == "Perhitungan COD":
-    st.markdown("<h1 style='color: #0284c7;'>🧪 Input Analisis Parameter COD</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='color: #38bdf8;'>🧪 Input Analisis Parameter COD</h1>", unsafe_allow_html=True)
     st.caption("Metode Refluks Terbuka / Titrasi dengan Larutan FAS")
     st.markdown("---")
     
@@ -455,7 +430,7 @@ elif pilih_fitur == "Perhitungan COD":
             st.rerun()
 
     with col_l2:
-        st.markdown("<h3 style='color: #0284c7;'>🧐 Hasil & Pembahasan AI</h3>", unsafe_allow_html=True)
+        st.markdown("<h3 style='color: #38bdf8;'>🧐 Hasil & Pembahasan AI</h3>", unsafe_allow_html=True)
         if "pembahasan_cod" in st.session_state:
             if st.session_state["status_cod"] == "MEMENUHI SYARAT":
                 st.success(f"🎉 HASIL: {st.session_state['nilai_cod']:.4f} mg/L ({st.session_state['status_cod']})")
@@ -468,7 +443,7 @@ elif pilih_fitur == "Perhitungan COD":
 
 # ⚖️ MENU 4: PERHITUNGAN TSS
 elif pilih_fitur == "Perhitungan TSS":
-    st.markdown("<h1 style='color: #0284c7;'>⚖️ Input Analisis Parameter TSS</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='color: #38bdf8;'>⚖️ Input Analisis Parameter TSS</h1>", unsafe_allow_html=True)
     st.caption("Metode Gravimetri (Penyaringan dengan Kertas Saring & Oven 105°C)")
     st.markdown("---")
     
@@ -495,7 +470,7 @@ elif pilih_fitur == "Perhitungan TSS":
             st.rerun()
 
     with col_n2:
-        st.markdown("<h3 style='color: #0284c7;'>🧐 Hasil & Pembahasan AI</h3>", unsafe_allow_html=True)
+        st.markdown("<h3 style='color: #38bdf8;'>🧐 Hasil & Pembahasan AI</h3>", unsafe_allow_html=True)
         if "pembahasan_tss" in st.session_state:
             if st.session_state["status_tss"] == "MEMENUHI SYARAT":
                 st.success(f"🎉 HASIL: {st.session_state['nilai_tss']:.4f} mg/L ({st.session_state['status_tss']})")
@@ -508,7 +483,7 @@ elif pilih_fitur == "Perhitungan TSS":
 
 # ⚖️ MENU 5: PERHITUNGAN DO
 elif pilih_fitur == "Perhitungan DO":
-    st.markdown("<h1 style='color: #0284c7;'>🧪 Input Analisis Parameter DO</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='color: #38bdf8;'>🧪 Input Analisis Parameter DO</h1>", unsafe_allow_html=True)
     st.caption("Metode Standar Fiksasi Lapangan & Titrasi Natrium Thiosulfat (Na2S2O3)")
     st.markdown("---")
     
@@ -535,7 +510,7 @@ elif pilih_fitur == "Perhitungan DO":
             st.rerun()
 
     with col_n2:
-        st.markdown("<h3 style='color: #0284c7;'>🧐 Hasil & Pembahasan AI</h3>", unsafe_allow_html=True)
+        st.markdown("<h3 style='color: #38bdf8;'>🧐 Hasil & Pembahasan AI</h3>", unsafe_allow_html=True)
         if "pembahasan_do" in st.session_state:
             if st.session_state["status_do"] == "MEMENUHI SYARAT":
                 st.success(f"🎉 HASIL: {st.session_state['nilai_do']:.4f} mg/L ({st.session_state['status_do']})")
@@ -548,7 +523,7 @@ elif pilih_fitur == "Perhitungan DO":
 
 # 📊 MENU 6: DATABASE RIWAYAT SAMPEL
 elif pilih_fitur == "Database Riwayat Sampel":
-    st.markdown("<h1 style='color: #0284c7;'>📊 Rekam Data Kualitas Air Permanen</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='color: #38bdf8;'>📊 Rekam Data Kualitas Air Permanen</h1>", unsafe_allow_html=True)
     st.caption("Seluruh riwayat pengujian sampel terintegrasi langsung di database fisik harddisk SQLite")
     st.markdown("---")
     
@@ -561,9 +536,9 @@ elif pilih_fitur == "Database Riwayat Sampel":
         st.markdown("<h3 class='section-head'>📊 Analisis Matematika Set Laboratorium</h3>", unsafe_allow_html=True)
         col_s1, col_s2 = st.columns(2)
         with col_s1:
-            st.markdown(f"<div style='background-color:rgba(239,68,68,0.05); padding:15px; border-radius:8px; border:1px solid rgba(239,68,68,0.2); border-left:4px solid #ef4444;'>⚠️ <b>Set Lokasi Bermasalah:</b> {set_tercemar if set_tercemar else 'Tidak ada'}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='background-color:rgba(239,68,68,0.15); padding:15px; border-radius:8px; border:1px solid rgba(239,68,68,0.4); border-left:4px solid #ef4444;'>⚠️ <b>Set Lokasi Bermasalah:</b> {set_tercemar if set_tercemar else 'Tidak ada'}</div>", unsafe_allow_html=True)
         with col_s2:
-            st.markdown(f"<div style='background-color:rgba(34,197,94,0.05); padding:15px; border-radius:8px; border:1px solid rgba(34,197,94,0.2); border-left:4px solid #22c55e;'>✅ <b>Set Lokasi Lolos Syarat:</b> {set_semua.difference(set_tercemar) if set_semua.difference(set_tercemar) else 'Tidak ada'}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='background-color:rgba(34,197,94,0.15); padding:15px; border-radius:8px; border:1px solid rgba(34,197,94,0.4); border-left:4px solid #22c55e;'>✅ <b>Set Lokasi Lolos Syarat:</b> {set_semua.difference(set_tercemar) if set_semua.difference(set_tercemar) else 'Tidak ada'}</div>", unsafe_allow_html=True)
         
         st.markdown("---")
         if st.button("🗑️ Kosongkan Seluruh Riwayat Database", use_container_width=True):
@@ -575,20 +550,20 @@ elif pilih_fitur == "Database Riwayat Sampel":
 
 # 🧠 MENU 7: INTELIGENSIA & KONSULTASI AI
 elif pilih_fitur == "Inteligensia & Konsultasi AI":
-    st.markdown("<h1 style='color: #0284c7;'>🧠 Pusat Kendali Pengetahuan & Konsultasi AI</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='color: #38bdf8;'>🧠 Pusat Kendali Pengetahuan & Konsultasi AI</h1>", unsafe_allow_html=True)
     st.caption("Diskusikan hasil analisis mutu air secara langsung atau tambahkan Standar Prosedur Operasional baru")
     st.markdown("---")
     
     col_a1, col_a2 = st.columns(2)
     with col_a1:
-        st.markdown("<h4 style='color: #0f172a;'>💬 Konsultasi Bersama AI Partner</h4>", unsafe_allow_html=True)
+        st.markdown("<h4 style='color: #fff;'>💬 Konsultasi Bersama AI Partner</h4>", unsafe_allow_html=True)
         chat_in = st.text_input("Ketik di sini (Contoh: 'halo', 'do', 'tss', atau 'rekap'):", key="chat_input_unique")
         if chat_in:
             with st.chat_message("assistant"):
                 st.write(ai_chatbot_brain(chat_in))
 
     with col_a2:
-        st.markdown("<h4 style='color: #0f172a;'>💾 Suntikkan Materi Pengetahuan Baru</h4>", unsafe_allow_html=True)
+        st.markdown("<h4 style='color: #fff;'>💾 Suntikkan Materi Pengetahuan Baru</h4>", unsafe_allow_html=True)
         topik = st.text_input("Topik Baru (Kata Kunci):").lower().strip()
         penjelasan = st.text_area("Deskripsi SOP / Penjelasan Ilmiah Kimia Analisis:")
         if st.button("🚀 Simpan Permanen ke Memori AI", use_container_width=True):
