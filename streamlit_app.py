@@ -3,8 +3,8 @@ import numpy as np
 import sqlite3
 
 # ==============================================================================
-# PROYEK: ISIS v3.4 - FIX POSISI CHAT DI SEBELAH KIRI (TAB AI)
-# Sidebar: Daftar Cepat Sampel | Konten Utama: Chat di Kiri, Form Input di Kanan
+# PROYEK: ISIS v3.5 - FIX SYNTAXERROR & LAYOUT CHAT TAB AI
+# Sidebar: Daftar Cepat Sampel | Konten Utama: Perhitungan & AI Bestie Style
 # ==============================================================================
 
 st.set_page_config(page_title="Water Quality Analytics System", page_icon="💧", layout="wide")
@@ -128,7 +128,7 @@ def ai_water_evaluation(data_baru, batas_maks):
         
     return pembahasan
 
-# 🧠 OTAK AI YANG MIRIP CHAT ASISTEN (CASUAL & ADAPTIF)
+# 🧠 OTAK AI YANG MIRIP CHAT ASISTEN (CASUAL & ADAPTIF) - FIX SYNTAX CLOSING
 def ai_chatbot_brain(pertanyaan):
     pertanyaan = pertanyaan.lower().strip()
     memori_pengetahuan = get_ai_knowledge()
@@ -155,6 +155,7 @@ def ai_chatbot_brain(pertanyaan):
             respons += f"Tapi awas nih, ada **{reject} sampel yang ambang batasnya jebol (merah)**. Butuh perhatian ekstra di unit pengolahan limbahnya ya!"
         else:
             respons += "Aman jaya! Sejauh ini belum ada sampel yang melebihi ambang batas regulasi lingkungan."
+            
         return respons
         
     return "Mmm, pola teks atau keyword materi itu belum ketemu di sel otak database-ku nih. Coba ajarkan aku dulu di form sebelah kanan supaya aku ingat selamanya!"
@@ -163,7 +164,7 @@ def ai_chatbot_brain(pertanyaan):
 # ==============================================================================
 # 💻 TAMPILAN FRONTEND WEB STREAMLIT
 # ==============================================================================
-st.title("💧 ISIS v3.4: Water Quality Perhitungan & Evaluasi Data Kimia")
+st.title("💧 ISIS v3.5: Water Quality Perhitungan & Evaluasi Data Kimia")
 st.caption("Sistem Analisis Parameter BOD & COD Laboratorium Lingkungan dengan Database Fisik SQLite")
 st.markdown("---")
 
@@ -258,19 +259,19 @@ with tab_riwayat:
     else:
         st.caption("Belum ada riwayat pengujian sampel air yang tersimpan di harddisk laptop.")
 
-# --- TAB 3: OTAK AI & KNOWLEDGE LAB (FIX POSISI CHAT DI SEBELAH KIRI) ---
+# --- TAB 3: OTAK AI & KNOWLEDGE LAB (KONSULTASI DI KIRI, SOP DI KANAN) ---
 with tab_ai:
     st.header("🧠 Long-Term Memory & Pengetahuan AI")
     col_a1, col_a2 = st.columns(2)
     
-    # 🌟 SEKARANG DI SEBELAH KIRI (col_a1): Room Konsultasi / Ruang Chat Bersama AI
+    # 🌟 KOLOM KIRI (col_a1): Murni Obrolan Chat Bersama AI
     with col_a1:
         st.subheader("💬 Konsultasi Mutu Air Bersama AI")
         chat_in = st.text_input("Tanyakan sesuatu ke AI (Contoh: 'halo', 'bod', 'cod', atau 'rekap'):")
         if chat_in:
             st.chat_message("assistant").write(ai_chatbot_brain(chat_in))
 
-    # 🌟 SEKARANG DI SEBELAH KANAN (col_a2): Form Ajarkan Ilmu Baru & JSON Database Otak
+    # 🌟 KOLOM KANAN (col_a2): Form Mengajar Standar SOP & Ringkasan JSON Memori
     with col_a2:
         st.subheader("📖 Ajarkan Standar Baku/SOP Air Baru")
         topik = st.text_input("Topik/Kata Kunci Baru:").lower().strip()
