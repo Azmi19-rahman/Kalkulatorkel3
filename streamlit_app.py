@@ -3,7 +3,7 @@ import numpy as np
 import sqlite3
 
 # ==============================================================================
-# PROYEK: ISIS v3.2 - KUALITAS AIR DENGAN OTAK AI CASUAL & ADAPTIF
+# PROYEK: ISIS v3.3 - REPOSISI KONTEN TAB AI & CHATBOT CASUAL
 # Sidebar: Daftar Cepat Sampel | Konten Utama: Form Mutu & AI Bestie Style
 # ==============================================================================
 
@@ -28,7 +28,7 @@ def init_db():
         )
     """)
     
-    # Isi pengetahuan dasar dengan gaya yang lebih santai tapi informatif
+    # Isi pengetahuan dasar laboratorium air
     cursor.execute("SELECT COUNT(*) FROM ai_knowledge")
     if cursor.fetchone()[0] == 0:
         knowledge_awal = [
@@ -128,24 +128,21 @@ def ai_water_evaluation(data_baru, batas_maks):
         
     return pembahasan
 
-# 🧠 OTAK AI YANG MIRIP CHAT ASISTEN (AUTHENTIC & WITTY)
+# 🧠 OTAK AI YANG MIRIP CHAT ASISTEN (CASUAL & ADAPTIF)
 def ai_chatbot_brain(pertanyaan):
     pertanyaan = pertanyaan.lower().strip()
     memori_pengetahuan = get_ai_knowledge()
     database_air = get_water_logs()
     
-    # Respons obrolan kasual pembuka
     if pertanyaan in ["halo", "hai", "p", "test", "halo ai"]:
         return "Sini, masuk! Ada data lab apa yang mau kita beresin bareng hari ini? 💧"
     if pertanyaan in ["kamu siapa", "siapa kamu", "siapa"]:
         return "Kenalin, aku asisten database AI pribadimu di proyek ISIS. Panggil aja partner lab-mu, siap bantu hitung data kimia anti-error! 🧠🚀"
     
-    # Cek kecocokan materi di database jangka panjang
     for kunci in memori_pengetahuan:
         if kunci in pertanyaan:
             return f"🧠 **[Long-Term Memory]:** Nah, kalau soal *{kunci}*, ingatan databaseku mencatat: {memori_pengetahuan[kunci]}"
             
-    # Laporan data historis dengan gaya santai
     if "rekap" in pertanyaan or "evaluasi" in pertanyaan or "total" in pertanyaan:
         if not database_air: 
             return "Waduh, database analisis kualitas air di harddisk laptopmu masih kosong melompong nih. Yuk, coba hitung dan simpan satu sampel dulu!"
@@ -166,7 +163,7 @@ def ai_chatbot_brain(pertanyaan):
 # ==============================================================================
 # 💻 TAMPILAN FRONTEND WEB STREAMLIT
 # ==============================================================================
-st.title("💧 ISIS v3.2: Water Quality Perhitungan & Evaluasi Data Kimia")
+st.title("💧 ISIS v3.3: Water Quality Perhitungan & Evaluasi Data Kimia")
 st.caption("Sistem Analisis Parameter BOD & COD Laboratorium Lingkungan dengan Database Fisik SQLite")
 st.markdown("---")
 
@@ -261,11 +258,12 @@ with tab_riwayat:
     else:
         st.caption("Belum ada riwayat pengujian sampel air yang tersimpan di harddisk laptop.")
 
-# --- TAB 3: OTAK AI & KNOWLEDGE LAB ---
+# --- TAB 3: OTAK AI & KNOWLEDGE LAB (POSISI SUDAH TERTUKAR KIRI-KANAN) ---
 with tab_ai:
     st.header("🧠 Long-Term Memory & Pengetahuan AI")
     col_a1, col_a2 = st.columns(2)
     
+    # 🌟 SEKARANG DI KIRI (col_a1): Form Ajarkan Ilmu Baru & JSON Database Otak
     with col_a1:
         st.subheader("📖 Ajarkan Standar Baku/SOP Air Baru")
         topik = st.text_input("Topik/Kata Kunci Baru:").lower().strip()
@@ -278,8 +276,10 @@ with tab_ai:
         st.subheader("📚 Daftar Isi Otak AI Saat Ini")
         st.json(get_ai_knowledge())
 
+    # 🌟 SEKARANG DI KANAN (col_a2): Room Konsultasi / Obrolan Chat Bersama AI
     with col_a2:
         st.subheader("💬 Konsultasi Mutu Air Bersama AI")
         chat_in = st.text_input("Tanyakan sesuatu ke AI (Contoh: 'halo', 'bod', 'cod', atau 'rekap'):")
         if chat_in:
             st.chat_message("assistant").write(ai_chatbot_brain(chat_in))
+            
