@@ -3,8 +3,8 @@ import numpy as np
 import sqlite3
 
 # ==============================================================================
-# PROYEK: WATER QUALITY ANALYTICS SYSTEM (LIVE BACKGROUND & CYBER THEME)
-# Tampilan UI Interaktif dengan Background Kustom Berwarna Hidup
+# PROYEK: WATER QUALITY ANALYTICS SYSTEM (ANIMATED DIGITAL WATER EDITION)
+# Tampilan UI Interaktif dengan Efek Animasi Matrix Water Flow Global
 # ==============================================================================
 
 st.set_page_config(page_title="Water Quality Analytics System", page_icon="💧", layout="wide")
@@ -173,52 +173,119 @@ def ai_chatbot_brain(pertanyaan):
 
 
 # ==============================================================================
-# 📱 TAMPILAN FRONTEND WEB STREAMLIT (KUSTOMISASI BACKGROUND & CSS GLOBAL)
+# 📱 FRONTEND & SUNTIKAN ANIMASI BACKGROUND JAVASCRIPT / CSS GLOBAL
 # ==============================================================================
 
+# 🌌 1. Injeksi Canvas HTML5 untuk Efek Digital Water Rain
+st.markdown("""
+    <canvas id="waterCanvas" style="position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:-1; pointer-events:none; opacity:0.12;"></canvas>
+    <script>
+    const canvas = document.getElementById('waterCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    const katakana = '💧01';
+    const alphabet = katakana.split('');
+
+    const fontSize = 16;
+    const columns = canvas.width / fontSize;
+
+    const rainDrops = [];
+    for (let x = 0; x < columns; x++) {
+        rainDrops[x] = 1;
+    }
+
+    function draw() {
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.05)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = '#00f2fe';
+        ctx.font = fontSize + 'px monospace';
+
+        for (let i = 0; i < rainDrops.length; i++) {
+            const text = alphabet[Math.floor(Math.random() * alphabet.length)];
+            ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
+
+            if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                rainDrops[i] = 0;
+            }
+            rainDrops[i]++;
+        }
+    }
+    setInterval(draw, 35);
+    </script>
+""", unsafe_allow_html=True)
+
+# 🎨 2. Kustomisasi Gaya CSS Tema Gelap & Efek Transisi Hover
 st.markdown("""
     <style>
-    /* 1. MENGUBAH BACKGROUND HALAMAN UTAMA */
+    /* Mengubah Background Dasar Aplikasi */
     .stApp {
-        background: linear-gradient(135deg, #0f172a 0%, #1e1e38 50%, #0d1117 100%);
+        background: radial-gradient(circle at top right, #1e1e38, #0f172a 60%, #080c14);
         color: #f8fafc !important;
     }
     
-    /* 2. MENGUBAH BACKGROUND SIDEBAR */
+    /* Mengubah Tampilan Panel Navigasi Sidebar */
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #0b0f19 0%, #111827 100%) !important;
+        background: linear-gradient(180deg, #090d16 0%, #0f172a 100%) !important;
         border-right: 2px solid #1e293b;
     }
     
-    /* 3. STYLE HURUF & TEXT */
+    /* Animasi Judul Utama */
     .main-title {
         font-size: 40px;
         font-weight: 800;
-        background: linear-gradient(45deg, #00f2fe, #4facfe);
+        background: linear-gradient(45deg, #00f2fe, #4facfe, #00f2fe);
+        background-size: 200% auto;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+        animation: shine 4s linear infinite;
         margin-bottom: 5px;
     }
+    @keyframes shine {
+        to { background-position: 200% center; }
+    }
     
-    /* 4. DESIGN KOTAK KUSTOM (CARDS) */
+    /* Desain Kartu Box Kustom dengan Efek Transisi Lembut saat di-Hover */
     .card-box-1 {
-        background-color: rgba(14, 165, 233, 0.15);
+        background-color: rgba(14, 165, 233, 0.1);
         padding: 22px;
         border-radius: 12px;
-        border: 1px solid rgba(14, 165, 233, 0.4);
+        border: 1px solid rgba(14, 165, 233, 0.3);
         border-left: 6px solid #0284c7;
         color: #e0f2fe;
         margin-bottom: 15px;
+        transition: all 0.3s ease;
     }
+    .card-box-1:hover {
+        transform: translateY(-3px);
+        background-color: rgba(14, 165, 233, 0.18);
+        box-shadow: 0 8px 20px rgba(2, 132, 199, 0.2);
+    }
+    
     .card-box-2 {
-        background-color: rgba(34, 197, 94, 0.15);
+        background-color: rgba(34, 197, 94, 0.1);
         padding: 22px;
         border-radius: 12px;
-        border: 1px solid rgba(34, 197, 94, 0.4);
+        border: 1px solid rgba(34, 197, 94, 0.3);
         border-left: 6px solid #16a34a;
         color: #dcfce7;
         margin-bottom: 15px;
+        transition: all 0.3s ease;
     }
+    .card-box-2:hover {
+        transform: translateY(-3px);
+        background-color: rgba(34, 197, 94, 0.18);
+        box-shadow: 0 8px 20px rgba(22, 163, 74, 0.2);
+    }
+    
+    /* Penyelarasan Judul Seksi */
     .section-head {
         color: #38bdf8;
         font-weight: bold;
@@ -227,12 +294,13 @@ st.markdown("""
         margin-top: 15px;
     }
     
-    /* 5. MENYESUAIKAN TEKS PADA LABEL KOMPONEN */
+    /* Pengaturan Global Warna Teks Default Label */
     label, p, span {
         color: #e2e8f0 !important;
     }
     </style>
 """, unsafe_allow_html=True)
+
 
 # --- KOLOM 1: SIDEBAR (NAVIGASI) ---
 with st.sidebar:
@@ -468,9 +536,9 @@ elif pilih_fitur == "Database Riwayat Sampel":
         st.markdown("<h3 class='section-head'>📊 Analisis Matematika Set Laboratorium</h3>", unsafe_allow_html=True)
         col_s1, col_s2 = st.columns(2)
         with col_s1:
-            st.markdown(f"<div style='background-color:rgba(239,68,68,0.2); padding:15px; border-radius:8px; border-left:4px solid #ef4444;'>⚠️ <b>Set Lokasi Bermasalah:</b> {set_tercemar if set_tercemar else 'Tidak ada'}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='background-color:rgba(239,68,68,0.15); padding:15px; border-radius:8px; border:1px solid rgba(239,68,68,0.4); border-left:4px solid #ef4444;'>⚠️ <b>Set Lokasi Bermasalah:</b> {set_tercemar if set_tercemar else 'Tidak ada'}</div>", unsafe_allow_html=True)
         with col_s2:
-            st.markdown(f"<div style='background-color:rgba(34,197,94,0.2); padding:15px; border-radius:8px; border-left:4px solid #22c55e;'>✅ <b>Set Lokasi Lolos Syarat:</b> {set_semua.difference(set_tercemar) if set_semua.difference(set_tercemar) else 'Tidak ada'}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='background-color:rgba(34,197,94,0.15); padding:15px; border-radius:8px; border:1px solid rgba(34,197,94,0.4); border-left:4px solid #22c55e;'>✅ <b>Set Lokasi Lolos Syarat:</b> {set_semua.difference(set_tercemar) if set_semua.difference(set_tercemar) else 'Tidak ada'}</div>", unsafe_allow_html=True)
         
         st.markdown("---")
         if st.button("🗑️ Kosongkan Seluruh Riwayat Database", use_container_width=True):
