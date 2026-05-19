@@ -3,7 +3,7 @@ import numpy as np
 import sqlite3
 
 # ==============================================================================
-# PROYEK: WATER QUALITY ANALYTICS SYSTEM
+# PROYEK: WATER QUALITY ANALYTICS SYSTEM (UPGRADED: + TSS & DO)
 # Struktur Navigasi Mengikuti Referensi (Sidebar Menu)
 # Modern, Bersih, Formal, dan Terintegrasi Database Fisik SQLite
 # ==============================================================================
@@ -13,7 +13,7 @@ st.set_page_config(page_title="Water Quality Analytics System", page_icon="💧"
 DB_FILE = "isis_water_quality.db"
 
 # ==============================================================================
-# 🗃️ INIDIALISASI DATABASE FISIK (SQLITE)
+# 🗃️ INISIALISASI DATABASE FISIK (SQLITE)
 # ==============================================================================
 def init_db():
     conn = sqlite3.connect(DB_FILE)
@@ -32,9 +32,11 @@ def init_db():
     cursor.execute("SELECT COUNT(*) FROM ai_knowledge")
     if cursor.fetchone()[0] == 0:
         knowledge_awal = [
-            ("bod", "BOD (Biochemical Oxygen Demand) merupakan takaran jumlah oksigen terlarut yang diperlukan oleh mikroorganisme untuk mendekomposisi bahan organik dalam air. Semakin tinggi nilai BOD, semakin rendah kualitas oksigen terlarut bagi ekosistem perairan."),
-            ("cod", "COD (Chemical Oxygen Demand) adalah jumlah total oksigen yang dibutuhkan untuk mengurai seluruh bahan organik melalui reaksi kimia menggunakan oksidator kuat. Nilai COD umumnya selalu lebih besar daripada BOD."),
-            ("regulasi", "Baku mutu nasional menetapkan batas aman untuk menjaga kelestarian lingkungan. Berdasarkan standar peruntukan kelas air, parameter BOD biasanya berkisar antara 2-12 mg/L dan COD berkisar antara 10-80 mg/L.")
+            ("bod", "BOD (Biochemical Oxygen Demand) merupakan takaran jumlah oksigen terlarut yang diperlukan oleh mikroorganisme untuk mendekomposisi bahan organik dalam air selama 5 hari."),
+            ("cod", "COD (Chemical Oxygen Demand) adalah jumlah total oksigen yang dibutuhkan untuk mengurai seluruh bahan organik melalui reaksi kimia menggunakan oksidator kuat."),
+            ("tss", "TSS (Total Suspended Solids) adalah material padatan tersuspensi (diameter > 1 mikrometer) yang tertahan pada media penyaring seperti kertas saring Whatman 41 setelah dikeringkan pada suhu 103-105°C."),
+            ("do", "DO (Dissolved Oxygen) atau oksigen terlarut menunjukkan volume gas oksigen yang terkandung di dalam air. Kadar DO yang tinggi menandakan kualitas air yang baik untuk kehidupan akuatik."),
+            ("regulasi", "Baku mutu air nasional diatur dalam PP No. 22 Tahun 2021. Batas parameter sangat bergantung pada kelas peruntukan air sungai atau badan air.")
         ]
         cursor.executemany("INSERT OR IGNORE INTO ai_knowledge VALUES (?, ?)", knowledge_awal)
         
@@ -98,31 +100,43 @@ def hitung_bod(do_nol, do_lima, pengenceran):
     try: return round((do_nol - do_lima) * pengenceran, 4)
     except Exception: return None
 
-def hitung_cod(vol_blanko, vol_sampel, norm_fas, berat_sampel):
-    try: return round(((vol_blanko - vol_sampel) * norm_fas * 8000) / berat_sampel, 4)
+def hitung_cod(vol_blanko, vol_sampel, norm_fas, vol_air):
+    try: return round(((vol_blanko - vol_sampel) * norm_fas * 8000) / vol_air, 4)
+    except ZeroDivisionError: return None
+
+def hitung_tss(berat_akhir, berat_awal, vol_sampel_ml):
+    try: return round(((berat_akhir - berat_awal) * 1000000) / vol_sampel_ml, 4)
+    except ZeroDivisionError: return None
+
+def hitung_do(vol_thiosulfat, norm_thiosulfat, vol_botol_do):
+    try: return round((vol_thiosulfat * norm_thiosulfat * 8000) / (vol_botol_do - 4), 4)
     except ZeroDivisionError: return None
 
 
 # ==============================================================================
 # 🧠 LOGIKA EVALUASI AI (FORMAT PARAGRAF KONTINU)
 # ==============================================================================
-def ai_water_evaluation(data_baru, batas_maks):
+def ai_water_evaluation(data_baru, batas_acuan, parameter_nama, tipe_ambang="maks"):
     logs = get_water_logs()
     data_sejenis = [d["nilai"] for d in logs if d["parameter"] == data_baru["parameter"] and d["status"] == "MEMENUHI SYARAT"]
     
-    pembahasan = f"Berdasarkan hasil analisis data laboratorium yang tersimpan di dalam database fisik, sampel air dengan kode identifikasi biner {data_baru['id_biner']} menunjukkan kadar {data_baru['parameter']} sebesar {data_baru['nilai']:.4f} mg/L. "
+    pembahasan = f"Berdasarkan hasil analisis data laboratorium yang tersimpan di dalam database fisik, sampel air dengan kode identifikasi biner {data_baru['id_biner']} menunjukkan kadar {parameter_nama} sebesar {data_baru['nilai']:.4f} mg/L. "
     
     if data_baru["status"] == "MEMENUHI SYARAT":
-        pembahasan += f"Nilai parameter ini berada di bawah batas ambang regulasi baku mutu lingkungan yang ditetapkan yaitu sebesar {batas_maks:.4f} mg/L, sehingga sampel air ini dinyatakan bersih dan layak untuk mendukung ekosistem perairan yang sehat. "
+        if tipe_ambang == "maks":
+            pembahasan += f"Nilai parameter ini berada di bawah batas ambang regulasi baku mutu lingkungan yang ditetapkan yaitu sebesar {batas_acuan:.4f} mg/L, sehingga sampel air ini dinyatakan bersih dan layak untuk mendukung ekosistem perairan yang sehat. "
+        else:
+            pembahasan += f"Kadar oksigen terlarut ini berada di atas ambang minimum batas regulasi baku mutu lingkungan yaitu sebesar {batas_acuan:.4f} mg/L, yang menandakan pasokan oksigen bagi biota akuatik berada dalam kondisi sangat optimal. "
     else:
-        pembahasan += f"Kadar zat organik tersebut telah melampaui batas ambang standar regulasi lingkungan sebesar {batas_maks:.4f} mg/L, yang menandakan tingkat pencemaran air yang tinggi dan berpotensi memicu kondisi defisit oksigen ekstrem di badan air. "
+        if tipe_ambang == "maks":
+            pembahasan += f"Kadar konsentrasi padatan atau beban limbah organik tersebut telah melampaui batas ambang standar regulasi lingkungan sebesar {batas_acuan:.4f} mg/L, yang menandakan tingkat pencemaran air yang tinggi dan berbahaya bagi badan air. "
+        else:
+            pembahasan += f"Kadar oksigen terlarut terpantau jatuh di bawah batas minimum kelayakan lingkungan yaitu sebesar {batas_acuan:.4f} mg/L, yang mengindikasikan terjadinya defisit oksigen parah akibat dekomposisi bahan organik berlebih. "
 
     if len(data_sejenis) >= 3:
         rata_rata = np.mean(data_sejenis)
         std_dev = np.std(data_sejenis)
         pembahasan += f"Apabila dibandingkan dengan data historis pengujian masa lalu, nilai rata-rata optimal untuk sampel yang lolos adalah {rata_rata:.4f} mg/L. Melalui analisis statistik tersebut, AI mengonfirmasi bahwa tren fluktuasi sampel ini masih berada dalam rentang deviasi normal lingkungan industri."
-        if data_baru["nilai"] > (rata_rata + 1.5 * std_dev) and data_baru["status"] == "MELEBIHI AMBANG":
-            pembahasan += " Namun demikian, AI mendeteksi adanya anomali lonjakan beban limbah organik yang sangat signifikan jika disandingkan dengan kurva historis tahunan, sehingga diperlukan inspeksi segera pada unit pengolahan limbah utama."
     else:
         pembahasan += "Saat ini AI belum mengaktifkan modul analitik prediktif mendalam dikarenakan jumlah data sampel valid yang tersimpan di harddisk komputer masih kurang dari tiga rekaman historis."
         
@@ -148,13 +162,13 @@ def ai_chatbot_brain(pertanyaan):
             return "Waduh, database analisis kualitas air di harddisk laptopmu masih kosong melompong nih. Yuk, coba hitung dan simpan satu sampel dulu!"
         
         total = len(database_air)
-        reject = sum(1 for d in database_air if d["status"] == "MELEBIHI AMBANG")
+        reject = sum(1 for d in database_air if d["status"] == "MELEBIHI AMBANG" or d["status"] == "DI BAWAH MINIMUM")
         
         respons = f"**[Database Report]:** Oke, mari kita cek isi harddisk! Total riwayat pengujian yang berhasil tersimpan ada **{total} sampel**. "
         if reject > 0:
-            respons += f"Tapi awas nih, ada **{reject} sampel yang ambang batasnya jebol (merah)**. Butuh perhatian ekstra di unit pengolahan limbahnya ya!"
+            respons += f"Tapi awas nih, ada **{reject} sampel yang ambang batasnya bermasalah (merah)**. Butuh perhatian ekstra di lingkungan ujinya ya!"
         else:
-            respons += "Aman jaya! Sejauh ini belum ada sampel yang melebihi ambang batas regulasi lingkungan."
+            respons += "Aman jaya! Sejauh ini belum ada sampel yang melebihi atau menyalahi ambang batas regulasi lingkungan."
             
         return respons
         
@@ -171,10 +185,10 @@ with st.sidebar:
     st.write("Politeknik AKA Bogor")
     st.markdown("---")
     
-    # 🌟 SISTEM NAVIGASI SIDEBAR: Radio Button persis seperti menu screenshot referensi
+    # 🌟 SISTEM NAVIGASI SIDEBAR: Menambah halaman parameter baru
     pilih_fitur = st.radio(
         "Pilih Fitur:",
-        ["Beranda", "Perhitungan BOD/COD", "Database Riwayat Sampel", "Inteligensia & Konsultasi AI"]
+        ["Beranda", "Perhitungan BOD/COD", "Perhitungan TSS/DO", "Database Riwayat Sampel", "Inteligensia & Konsultasi AI"]
     )
     st.markdown("---")
     
@@ -182,10 +196,10 @@ with st.sidebar:
     st.subheader("Ringkasan Data Lab")
     logs_saat_ini = get_water_logs()
     total_data = len(logs_saat_ini)
-    total_tercemar = sum(1 for d in logs_saat_ini if d["status"] == "MELEBIHI AMBANG")
+    total_bermasalah = sum(1 for d in logs_saat_ini if d["status"] in ["MELEBIHI AMBANG", "DI BAWAH MINIMUM"])
     
     st.metric("Total Sampel Teruji", f"{total_data} Sampel")
-    st.metric("Sampel Melebihi Ambang", f"{total_tercemar} Sampel", delta=f"+{total_tercemar}" if total_tercemar > 0 else "0", delta_color="inverse")
+    st.metric("Sampel Bermasalah", f"{total_bermasalah} Sampel", delta=f"+{total_bermasalah}" if total_bermasalah > 0 else "0", delta_color="inverse")
 
 
 # --- KOLOM 2: KONTEN UTAMA (BERUBAH SESUAI PILIHAN SIDEBAR) ---
@@ -201,13 +215,13 @@ if pilih_fitur == "Beranda":
     with col_ref1:
         st.subheader("🎯 Tujuan Aplikasi")
         st.write("""
-        Aplikasi ini dirancang sebagai solusi terintegrasi untuk membantu laboran dan analis kimia dalam memproses data kualitas air, khususnya parameter Biochemical Oxygen Demand (BOD) dan Chemical Oxygen Demand (COD). Sistem ini bertujuan untuk mengotomatisasi kalkulasi rumus kimia yang rumit, menjamin penyimpanan rekam data riwayat sampel secara permanen di database fisik, serta menyediakan modul evaluasi berbasis kecerdasan buatan (AI) yang siap pakai.
+        Aplikasi ini dirancang sebagai solusi terintegrasi untuk membantu laboran dan analis kimia dalam memproses data kualitas air, khususnya parameter Biochemical Oxygen Demand (BOD), Chemical Oxygen Demand (COD), Total Suspended Solids (TSS), dan Dissolved Oxygen (DO). Sistem ini bertujuan untuk mengotomatisasi kalkulasi rumus kimia yang rumit, menjamin penyimpanan rekam data riwayat sampel secara permanen di database fisik, serta menyediakan modul evaluasi berbasis kecerdasan buatan (AI) yang siap pakai.
         """)
         
     with col_ref2:
         st.subheader("📚 Manfaat Aplikasi")
         st.write("""
-        Dengan menggunakan aplikasi ini, laboran dapat meminimalkan risiko 'human error' atau galat matematis saat perhitungan desimal bertingkat. Selain itu, integrasi database SQLite memastikan kepatuhan terhadap prinsip 'data integrity' lab lingkungan. Fitur chatbot komputasi AI juga mempercepat penyusunan narasi pembahasan hasil uji, menjadikan alur kerja laboratorium menjadi lebih cepat, akurat, dan terstandarisasi.
+        Dengan menggunakan aplikasi ini, laboran dapat meminimalkan risiko 'human error' atau galat matematis saat perhitungan desimal bertingkat pada penimbangan gravimetri maupun titrasi volumetri. Selain itu, integrasi database SQLite memastikan kepatuhan terhadap prinsip 'data integrity' lab lingkungan. Fitur chatbot komputasi AI juga mempercepat penyusunan narasi pembahasan hasil uji, menjadikan alur kerja laboratorium menjadi lebih cepat, akurat, dan terstandarisasi.
         """)
         
     st.markdown("---")
@@ -217,8 +231,8 @@ if pilih_fitur == "Beranda":
 
 # 🧮 MENU 2: PERHITUNGAN BOD/COD
 elif pilih_fitur == "Perhitungan BOD/COD":
-    st.title("🧮 Perhitungan Parameter Kimia Air")
-    st.caption("Gunakan form ini untuk melakukan kalkulasi data mentah laboratorium")
+    st.title("🧮 Perhitungan Parameter BOD & COD")
+    st.caption("Gunakan form ini untuk melakukan kalkulasi data oksigen biokimiawi dan kimiawi")
     st.markdown("---")
     
     col_mutu1, col_mutu2 = st.columns(2)
@@ -240,7 +254,7 @@ elif pilih_fitur == "Perhitungan BOD/COD":
             do_5 = st.number_input("Kadar DO Hari Ke-5 (DO5) (mg/L):", value=4.5000, format="%.4f")
             f_pengenceran = st.number_input("Faktor Pengenceran (P):", value=2.0, step=0.5)
             
-            if st.button("Hitung & Simpan Data"):
+            if st.button("Hitung & Simpan Data BOD"):
                 hasil = hitung_bod(do_0, do_5, f_pengenceran)
                 status = "MEMENUHI SYARAT" if hasil <= bod_max else "MELEBIHI AMBANG"
                 biner_id = desimal_ke_biner(len(get_water_logs()) + 1)
@@ -248,7 +262,7 @@ elif pilih_fitur == "Perhitungan BOD/COD":
                 ket_singkat = f"DO0={do_0}, DO5={do_5}, P={f_pengenceran}"
                 
                 save_water_log(biner_id, nama_smpl, "BOD", hasil, status, ket_singkat)
-                st.session_state["pembahasan_ai"] = ai_water_evaluation({"id_biner": biner_id, "parameter": "BOD", "nilai": hasil, "status": status}, bod_max)
+                st.session_state["pembahasan_ai"] = ai_water_evaluation({"id_biner": biner_id, "parameter": "BOD", "nilai": hasil, "status": status}, bod_max, "BOD", "maks")
                 st.rerun()
                 
         elif "COD" in sub_metode:
@@ -258,15 +272,15 @@ elif pilih_fitur == "Perhitungan BOD/COD":
             n_fas = st.number_input("Normalitas Larutan FAS (N):", value=0.1000, format="%.4f")
             vol_air = st.number_input("Volume Sampel Air Teruji (mL):", value=50.00, format="%.2f")
             
-            if st.button("Hitung & Simpan Data"):
+            if st.button("Hitung & Simpan Data COD"):
                 hasil = hitung_cod(v_blanko, v_sampel, n_fas, vol_air)
                 status = "MEMENUHI SYARAT" if hasil <= cod_max else "MELEBIHI AMBANG"
                 biner_id = desimal_ke_biner(len(get_water_logs()) + 1)
                 
-                ket_singkat = f"V_B={v_blanko}, V_S={v_sampel}, N_FAS={n_fas}"
+                command_ket = f"V_B={v_blanko}, V_S={v_sampel}, N_FAS={n_fas}"
                 
-                save_water_log(biner_id, nama_smpl, "COD", hasil, status, ket_singkat)
-                st.session_state["pembahasan_ai"] = ai_water_evaluation({"id_biner": biner_id, "parameter": "COD", "nilai": hasil, "status": status}, cod_max)
+                save_water_log(biner_id, nama_smpl, "COD", hasil, status, command_ket)
+                st.session_state["pembahasan_ai"] = ai_water_evaluation({"id_biner": biner_id, "parameter": "COD", "nilai": hasil, "status": status}, cod_max, "COD", "maks")
                 st.rerun()
 
     with col_l2:
@@ -277,20 +291,81 @@ elif pilih_fitur == "Perhitungan BOD/COD":
             st.caption("Sistem akan memunculkan narasi pembahasan otomatis di sini setelah kalkulasi selesai.")
 
 
-# 📊 MENU 3: DATABASE RIWAYAT SAMPEL
+# ⚖️ MENU 3: PERHITUNGAN TSS/DO (FITUR BARU)
+elif pilih_fitur == "Perhitungan TSS/DO":
+    st.title("⚖️ Perhitungan Parameter TSS & DO Instan")
+    st.caption("Gunakan form ini untuk gravimetri TSS dan titrasi thiosulfat DO")
+    st.markdown("---")
+    
+    col_mutu3, col_mutu4 = st.columns(2)
+    with col_mutu3:
+        tss_max = st.number_input("Batas Maks Baku Mutu TSS (mg/L):", value=50.0000, step=5.0000, format="%.4f")
+    with col_mutu4:
+        do_min = st.number_input("Batas Minimum Baku Mutu DO (mg/L):", value=4.0000, step=0.5000, format="%.4f")
+    st.markdown("---")
+    
+    sub_metode_baru = st.selectbox("Pilih Parameter Uji Baru:", ["TSS (Total Suspended Solids)", "DO (Dissolved Oxygen) - Metode Winkler Direct"])
+    col_n1, col_n2 = st.columns([1.4, 1.2])
+    
+    with col_n1:
+        nama_smpl_baru = st.text_input("Kode / Lokasi Sampel Air:", value="Sungai Ciliwung-02", key="sampel_baru_key")
+        
+        if "TSS" in sub_metode_baru:
+            st.caption("Metode Gravimetri (Penyaringan dengan Kertas Saring & Oven 105°C)")
+            b_awal = st.number_input("Berat Kertas Saring Kosong (gram):", value=1.2345, format="%.4f")
+            b_akhir = st.number_input("Berat Kertas Saring + Padatan Kering (gram):", value=1.2455, format="%.4f")
+            v_air_tss = st.number_input("Volume Sampel Air yang Disaring (mL):", value=100.00, format="%.2f")
+            
+            if st.button("Hitung & Simpan Data TSS"):
+                hasil = hitung_tss(b_akhir, b_awal, v_air_tss)
+                status = "MEMENUHI SYARAT" if hasil <= tss_max else "MELEBIHI AMBANG"
+                biner_id = desimal_ke_biner(len(get_water_logs()) + 1)
+                
+                command_ket = f"B_Awal={b_awal} g, B_Akhir={b_akhir} g, V={v_air_tss} mL"
+                
+                save_water_log(biner_id, nama_smpl_baru, "TSS", hasil, status, command_ket)
+                st.session_state["pembahasan_ai_baru"] = ai_water_evaluation({"id_biner": biner_id, "parameter": "TSS", "nilai": hasil, "status": status}, tss_max, "TSS", "maks")
+                st.rerun()
+                
+        elif "DO" in sub_metode_baru:
+            st.caption("Metode Standar Fiksasi Lapangan & Titrasi Natrium Thiosulfat ($Na_2S_2O_3$)")
+            v_thio = st.number_input("Volume Penitran Thiosulfat (mL):", value=5.40, format="%.2f")
+            n_thio = st.number_input("Normalitas Larutan Thiosulfat (N):", value=0.0250, format="%.4f")
+            v_botol = st.number_input("Volume Botol DO yang Digunakan (mL):", value=250.00, format="%.2f")
+            
+            if st.button("Hitung & Simpan Data DO"):
+                hasil = hitung_do(v_thio, n_thio, v_botol)
+                status = "MEMENUHI SYARAT" if hasil >= do_min else "DI BAWAH MINIMUM"
+                biner_id = desimal_ke_biner(len(get_water_logs()) + 1)
+                
+                command_ket = f"V_Thio={v_thio} mL, N={n_thio}, V_Botol={v_botol} mL"
+                
+                save_water_log(biner_id, nama_smpl_baru, "DO", hasil, status, command_ket)
+                st.session_state["pembahasan_ai_baru"] = ai_water_evaluation({"id_biner": biner_id, "parameter": "DO", "nilai": hasil, "status": status}, do_min, "Dissolved Oxygen (DO)", "min")
+                st.rerun()
+
+    with col_n2:
+        st.subheader("Bab 3: Pembahasan Evaluasi AI")
+        if "pembahasan_ai_baru" in st.session_state:
+            st.info(st.session_state["pembahasan_ai_baru"])
+        else:
+            st.caption("Sistem akan memunculkan narasi pembahasan otomatis di sini setelah kalkulasi selesai.")
+
+
+# 📊 MENU 4: DATABASE RIWAYAT SAMPEL
 elif pilih_fitur == "Database Riwayat Sampel":
     st.title("📊 Rekam Data Kualitas Air Permanen")
-    st.caption("Seluruh riwayat pengujian sampel tersimpan dengan aman di database fisik harddisk")
+    st.caption("Seluruh riwayat pengujian sampel terintegrasi langsung di database fisik harddisk")
     st.markdown("---")
     
     if logs_saat_ini:
         st.table(logs_saat_ini)
         
         set_semua = {d["sampel"] for d in logs_saat_ini}
-        set_tercemar = {d["sampel"] for d in logs_saat_ini if d["status"] == "MELEBIHI AMBANG"}
+        set_tercemar = {d["sampel"] for d in logs_saat_ini if d["status"] in ["MELEBIHI AMBANG", "DI BAWAH MINIMUM"]}
         
         st.subheader("Analisis Set Laboratorium")
-        st.write(f"**Set Lokasi Tercemar (Melebihi Ambang):** {set_tercemar if set_tercemar else 'Tidak ada'}")
+        st.write(f"**Set Lokasi Tercemar / Bermasalah:** {set_tercemar if set_tercemar else 'Tidak ada'}")
         st.write(f"**Set Lokasi Aman Bersih (Lolos Syarat):** {set_semua.difference(set_tercemar) if set_semua.difference(set_tercemar) else 'Tidak ada'}")
         
         st.markdown("---")
@@ -301,7 +376,7 @@ elif pilih_fitur == "Database Riwayat Sampel":
         st.caption("Belum ada riwayat pengujian sampel air yang tersimpan di harddisk komputer.")
 
 
-# 🧠 MENU 4: INTELIGENSIA & KONSULTASI AI
+# 🧠 MENU 5: INTELIGENSIA & KONSULTASI AI
 elif pilih_fitur == "Inteligensia & Konsultasi AI":
     st.title("🧠 Pusat Kendali Pengetahuan & Konsultasi AI")
     st.caption("Gunakan fitur ini untuk berdiskusi dengan AI atau memasukkan materi laboratorium baru")
@@ -311,7 +386,7 @@ elif pilih_fitur == "Inteligensia & Konsultasi AI":
     
     with col_a1:
         st.write("**Konsultasi Mutu Air Bersama AI**")
-        chat_in = st.text_input("Tanyakan sesuatu ke AI (Contoh: 'halo', 'bod', 'cod', atau 'rekap'):", key="chat_input_unique")
+        chat_in = st.text_input("Tanyakan sesuatu ke AI (Contoh: 'halo', 'tss', 'do', atau 'rekap'):", key="chat_input_unique")
         if chat_in:
             st.chat_message("assistant").write(ai_chatbot_brain(chat_in))
 
