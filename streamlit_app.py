@@ -5,7 +5,7 @@ import base64
 import os
 
 # ==============================================================================
-# PROYEK: WATER QUALITY ANALYTICS SYSTEM (TRANSPARAN KALKULASI EDITION)
+# PROYEK: WATER QUALITY ANALYTICS SYSTEM (DARK ELEGANT GLASS EDITION)
 # ==============================================================================
 
 st.set_page_config(page_title="Water Quality Analytics System", page_icon="💧", layout="wide")
@@ -21,7 +21,7 @@ def get_base64_image(image_path):
             return base64.b64encode(img_file.read()).decode()
     return ""
 
-# Silakan letakkan file gambar lab kamu di folder yang sama dengan nama 'bg_lab.png'
+# Pastikan file gambar lab kamu sudah di dalam folder dengan nama 'bg_lab.png'
 img_base64 = get_base64_image("bg_lab.png")
 
 # ==============================================================================
@@ -186,15 +186,15 @@ def ai_chatbot_brain(pertanyaan):
 
 
 # ==============================================================================
-# 📱 FRONTEND & ELEMEN ANIMASI GELEMBUNG REALISTIS
+# 📱 FRONTEND & ELEMEN ANIMASI GELEMBUNG REALISTIS (DARK MODE INTEGRATION)
 # ==============================================================================
 
 # 🌌 1. Injeksi Canvas HTML5 untuk Animasi Gelembung Kaca Laboratorium 3D Berpendar
 st.markdown("""
-    <canvas id="customLabCanvas" style="position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:-1; pointer-events:none; opacity:0.65;"></canvas>
+    <canvas id="customLabCanvas" style="position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:-1; pointer-events:none; opacity:0.85;"></canvas>
     <script>
     const canvas = document.getElementById('customLabCanvas');
-    const ctx = canvas.getContext('customLabCanvas').getContext('2d') ? canvas.getContext('2d') : canvas.getContext('2d');
+    const ctx = canvas.getContext('2d');
 
     function resize() {
         canvas.width = window.innerWidth;
@@ -204,15 +204,15 @@ st.markdown("""
     resize();
 
     const bubbles = [];
-    for(let i=0; i<25; i++) {
+    for(let i=0; i<28; i++) {
         bubbles.push({
             x: Math.random() * canvas.width,
             y: canvas.height + Math.random() * 200,
-            radius: Math.random() * 8 + 4,
-            speed: Math.random() * 0.8 + 0.4,
+            radius: Math.random() * 7 + 3,
+            speed: Math.random() * 0.7 + 0.3,
             wobble: Math.random() * 2,
-            wobbleSpeed: Math.random() * 0.02,
-            opacity: Math.random() * 0.4 + 0.2
+            wobbleSpeed: Math.random() * 0.015,
+            opacity: Math.random() * 0.5 + 0.3
         });
     }
 
@@ -221,30 +221,29 @@ st.markdown("""
         bubbles.forEach(b => {
             b.y -= b.speed;
             b.wobble += b.wobbleSpeed;
-            b.x += Math.sin(b.wobble) * 0.4;
+            b.x += Math.sin(b.wobble) * 0.3;
 
             if(b.y < -20) {
                 b.y = canvas.height + 20;
                 b.x = Math.random() * canvas.width;
             }
 
-            // Menggambar struktur gelembung kaca realistis (radial gradient)
-            let gradient = ctx.createRadialGradient(b.x - b.radius*0.3, b.y - b.radius*0.3, b.radius * 0.1, b.x, b.y, b.radius);
+            // Menggambar gelembung menyala di background gelap
+            let gradient = ctx.createRadialGradient(b.x - b.radius*0.2, b.y - b.radius*0.2, b.radius * 0.05, b.x, b.y, b.radius);
             gradient.addColorStop(0, `rgba(255, 255, 255, ${b.opacity + 0.3})`);
-            gradient.addColorStop(0.6, `rgba(173, 216, 230, ${b.opacity * 0.4})`);
-            gradient.addColorStop(1, `rgba(74, 144, 226, ${b.opacity * 0.8})`);
+            gradient.addColorStop(0.5, `rgba(135, 206, 250, ${b.opacity * 0.3})`);
+            gradient.addColorStop(1, `rgba(30, 144, 255, ${b.opacity * 0.6})`);
 
             ctx.beginPath();
             ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
             ctx.fillStyle = gradient;
-            ctx.strokeStyle = `rgba(255, 255, 255, ${b.opacity * 0.6})`;
-            ctx.lineWidth = 1;
+            ctx.strokeStyle = `rgba(255, 255, 255, ${b.opacity * 0.4})`;
+            ctx.lineWidth = 0.8;
             ctx.stroke();
             ctx.fill();
 
-            // Efek kilauan cahaya kecil (highlight 3D) di pojok atas gelembung
             ctx.beginPath();
-            ctx.arc(b.x - b.radius * 0.3, b.y - b.radius * 0.3, b.radius * 0.15, 0, Math.PI * 2);
+            ctx.arc(b.x - b.radius * 0.25, b.y - b.radius * 0.25, b.radius * 0.12, 0, Math.PI * 2);
             ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
             ctx.fill();
         });
@@ -254,93 +253,107 @@ st.markdown("""
     </script>
 """, unsafe_allow_html=True)
 
-# 🎨 2. CSS Kustom untuk Integrasi Latar Belakang dan Desain Kaca Transparan
+# 🎨 2. CSS KUSTOM: ELEGAN DARK OVERLAY BERGAYA GLASSMORPHISM GELAP
 if img_base64:
+    # Overlay gradasi warna gelap (dark navy ke deep charcoal) menutup di atas gambar kamu
     bg_style = f"""
-    background: linear-gradient(135deg, rgba(255,255,255,0.78) 0%, rgba(240,247,255,0.82) 100%), 
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.90) 0%, rgba(8, 15, 30, 0.94) 100%), 
                 url('data:image/png;base64,{img_base64}') no-repeat center center fixed;
     background-size: cover;
     """
 else:
-    bg_style = "background: linear-gradient(135deg, #ffffff 0%, #e6f2ff 100%);"
+    bg_style = "background: linear-gradient(135deg, #0f172a 0%, #020617 100%);"
 
 st.markdown(f"""
     <style>
+    /* Aplikasi Tema Gelap */
     .stApp {{
         {bg_style}
-        color: #1e293b !important;
+        color: #f8fafc !important;
     }}
     
+    /* Navigasi Sidebar Gelap Elegan */
     [data-testid="stSidebar"] {{
-        background: rgba(248, 250, 252, 0.6) !important;
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border-right: 1px solid rgba(203, 213, 225, 0.5);
+        background: rgba(15, 23, 42, 0.7) !important;
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border-right: 1px solid rgba(51, 65, 85, 0.5);
     }}
     
     .main-title {{
         font-size: 38px;
         font-weight: 800;
-        background: linear-gradient(45deg, #0284c7, #1e40af);
+        background: linear-gradient(45deg, #38bdf8, #60a5fa);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }}
     
+    /* KARTU GLASSMORPHISM GELAP (DARK-GLASS) */
     .card-box-1 {{
-        background: rgba(255, 255, 255, 0.6);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
+        background: rgba(30, 41, 59, 0.55);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
         padding: 22px;
         border-radius: 14px;
-        border: 1px solid rgba(14, 165, 233, 0.2);
-        border-left: 6px solid #0284c7;
-        color: #1e293b;
+        border: 1px solid rgba(56, 189, 248, 0.25);
+        border-left: 6px solid #0ea5e9;
+        color: #f1f5f9;
         margin-bottom: 15px;
     }}
     
     .card-box-2 {{
-        background: rgba(255, 255, 255, 0.6);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
+        background: rgba(30, 41, 59, 0.55);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
         padding: 22px;
         border-radius: 14px;
-        border: 1px solid rgba(22, 163, 74, 0.2);
-        border-left: 6px solid #16a34a;
-        color: #1e293b;
+        border: 1px solid rgba(74, 222, 128, 0.25);
+        border-left: 6px solid #22c55e;
+        color: #f1f5f9;
         margin-bottom: 15px;
     }}
     
+    /* Kotak Langkah Kalkulasi Monospace yang Kontras Tinggi */
     .calc-box {{
-        background: rgba(243, 244, 246, 0.75);
-        border: 1px dashed #0284c7;
+        background: rgba(15, 23, 42, 0.85);
+        border: 1px dashed #38bdf8;
         border-radius: 8px;
         padding: 15px;
         font-family: 'Courier New', Courier, monospace;
-        color: #0f172a !important;
+        color: #38bdf8 !important;
         margin-top: 10px;
     }}
     
     .section-head {{
-        color: #0369a1;
+        color: #38bdf8;
         font-weight: bold;
-        border-bottom: 2px solid rgba(203, 213, 225, 0.6);
+        border-bottom: 2px solid rgba(51, 65, 85, 0.6);
         padding-bottom: 5px;
         margin-top: 15px;
     }}
     
-    label, p, span, div {{
-        color: #334155 !important;
+    /* Memaksa elemen teks bawaan streamlit mengikuti aturan warna terang di dark mode */
+    label, p, span, div, .stMarkdown {{
+        color: #e2e8f0 !important;
     }}
     h1, h2, h3, h4, h5, h6 {{
-        color: #0f172a !important;
+        color: #f8fafc !important;
     }}
     
+    /* Tombol Biru Neon Cyan */
     .stButton>button {{
-        background: linear-gradient(45deg, #0284c7, #2563eb) !important;
+        background: linear-gradient(45deg, #0284c7, #3b82f6) !important;
         color: white !important;
         border-radius: 8px !important;
-        border: none !important;
+        border: 1px solid rgba(56, 189, 248, 0.4) !important;
         font-weight: 600 !important;
+        box-shadow: 0 4px 15px rgba(2, 132, 199, 0.3) !important;
+    }}
+    
+    /* Tabel Data agar rapi di layar gelap */
+    .stTable table {{
+        background-color: rgba(30, 41, 59, 0.4) !important;
+        color: #f1f5f9 !important;
     }}
     </style>
 """, unsafe_allow_html=True)
@@ -348,8 +361,8 @@ st.markdown(f"""
 
 # --- SIDEBAR (NAVIGASI) ---
 with st.sidebar:
-    st.markdown("<h2 style='color: #0284c7; margin-bottom: 0px; font-weight:800;'>💧 Water Quality</h2>", unsafe_allow_html=True)
-    st.markdown("<p style='font-style: italic; color: #64748b; margin-top:0px;'>Politeknik AKA Bogor</p>", unsafe_allow_html=True)
+    st.markdown("<h2 style='color: #38bdf8; margin-bottom: 0px; font-weight:800;'>💧 Water Quality</h2>", unsafe_allow_html=True)
+    st.markdown("<p style='font-style: italic; color: #94a3b8; margin-top:0px;'>Politeknik AKA Bogor</p>", unsafe_allow_html=True)
     st.markdown("---")
     
     pilih_fitur = st.radio(
@@ -375,14 +388,14 @@ if pilih_fitur == "Beranda":
     
     col_ref1, col_ref2 = st.columns(2)
     with col_ref1:
-        st.markdown("<div class='card-box-1'><h3 style='color: #0284c7; margin-top:0px;'>🎯 Tujuan Aplikasi</h3><p>Mengotomatisasi pengolahan data praktikum parameter air untuk mencegah kesalahan hitung manual, serta menyimpan data riwayat laboratorium secara aman.</p></div>", unsafe_allow_html=True)
+        st.markdown("<div class='card-box-1'><h3 style='color: #38bdf8; margin-top:0px;'>🎯 Tujuan Aplikasi</h3><p>Mengotomatisasi pengolahan data praktikum parameter air untuk mencegah kesalahan hitung manual, serta menyimpan data riwayat laboratorium secara aman.</p></div>", unsafe_allow_html=True)
     with col_ref2:
-        st.markdown("<div class='card-box-2'><h3 style='color: #16a34a; margin-top:0px;'>📚 Manfaat AI</h3><p>Membantu penyusunan narasi Bab Pembahasan (paragraf kontinu) secara otomatis bersandarkan data historis dan ambang batas baku mutu lingkungan.</p></div>", unsafe_allow_html=True)
+        st.markdown("<div class='card-box-2'><h3 style='color: #4ade80; margin-top:0px;'>📚 Manfaat AI</h3><p>Membantu penyusunan narasi Bab Pembahasan (paragraf kontinu) secara otomatis bersandarkan data historis dan ambang batas baku mutu lingkungan.</p></div>", unsafe_allow_html=True)
 
 
 # 🧪 PERHITUNGAN BOD
 elif pilih_fitur == "Perhitungan BOD":
-    st.markdown("<h1 style='color: #0284c7;'>🧪 Input Analisis Parameter BOD</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='color: #38bdf8;'>🧪 Input Analisis Parameter BOD</h1>", unsafe_allow_html=True)
     st.markdown("---")
     bod_max = st.number_input("🚨 Batas Maks Baku Mutu BOD (mg/L):", value=6.0000, step=0.5000, format="%.4f")
     
@@ -406,7 +419,7 @@ elif pilih_fitur == "Perhitungan BOD":
             st.rerun()
 
     with col_l2:
-        st.markdown("<h3 style='color: #0284c7;'>🧐 Hasil & Rincian Logika Perhitungan</h3>", unsafe_allow_html=True)
+        st.markdown("<h3 style='color: #38bdf8;'>🧐 Hasil & Rincian Logika Perhitungan</h3>", unsafe_allow_html=True)
         if "pembahasan_bod" in st.session_state:
             if st.session_state["status_bod"] == "MEMENUHI SYARAT":
                 st.success(f"🎉 HASIL: {st.session_state['nilai_bod']:.4f} mg/L ({st.session_state['status_bod']})")
@@ -420,7 +433,7 @@ elif pilih_fitur == "Perhitungan BOD":
 
 # 🧪 PERHITUNGAN COD
 elif pilih_fitur == "Perhitungan COD":
-    st.markdown("<h1 style='color: #0284c7;'>🧪 Input Analisis Parameter COD</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='color: #38bdf8;'>🧪 Input Analisis Parameter COD</h1>", unsafe_allow_html=True)
     st.markdown("---")
     cod_max = st.number_input("🚨 Batas Maks Baku Mutu COD (mg/L):", value=25.0000, step=1.0000, format="%.4f")
     
@@ -445,7 +458,7 @@ elif pilih_fitur == "Perhitungan COD":
             st.rerun()
 
     with col_l2:
-        st.markdown("<h3 style='color: #0284c7;'>🧐 Hasil & Rincian Logika Perhitungan</h3>", unsafe_allow_html=True)
+        st.markdown("<h3 style='color: #38bdf8;'>🧐 Hasil & Rincian Logika Perhitungan</h3>", unsafe_allow_html=True)
         if "pembahasan_cod" in st.session_state:
             if st.session_state["status_cod"] == "MEMENUHI SYARAT":
                 st.success(f"🎉 HASIL: {st.session_state['nilai_cod']:.4f} mg/L ({st.session_state['status_cod']})")
@@ -459,7 +472,7 @@ elif pilih_fitur == "Perhitungan COD":
 
 # ⚖️ PERHITUNGAN TSS
 elif pilih_fitur == "Perhitungan TSS":
-    st.markdown("<h1 style='color: #0284c7;'>⚖️ Input Analisis Parameter TSS</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='color: #38bdf8;'>⚖️ Input Analisis Parameter TSS</h1>", unsafe_allow_html=True)
     st.markdown("---")
     tss_max = st.number_input("🚨 Batas Maks Baku Mutu TSS (mg/L):", value=50.0000, step=5.0000, format="%.4f")
     
@@ -483,7 +496,7 @@ elif pilih_fitur == "Perhitungan TSS":
             st.rerun()
 
     with col_n2:
-        st.markdown("<h3 style='color: #0284c7;'>🧐 Hasil & Rincian Logika Perhitungan</h3>", unsafe_allow_html=True)
+        st.markdown("<h3 style='color: #38bdf8;'>🧐 Hasil & Rincian Logika Perhitungan</h3>", unsafe_allow_html=True)
         if "pembahasan_tss" in st.session_state:
             if st.session_state["status_tss"] == "MEMENUHI SYARAT":
                 st.success(f"🎉 HASIL: {st.session_state['nilai_tss']:.4f} mg/L ({st.session_state['status_tss']})")
@@ -497,7 +510,7 @@ elif pilih_fitur == "Perhitungan TSS":
 
 # 🧪 PERHITUNGAN DO
 elif pilih_fitur == "Perhitungan DO":
-    st.markdown("<h1 style='color: #0284c7;'>🧪 Input Analisis Parameter DO</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='color: #38bdf8;'>🧪 Input Analisis Parameter DO</h1>", unsafe_allow_html=True)
     st.markdown("---")
     do_min = st.number_input("🚨 Batas Minimum Baku Mutu DO (mg/L):", value=4.0000, step=0.5000, format="%.4f")
     
@@ -521,7 +534,7 @@ elif pilih_fitur == "Perhitungan DO":
             st.rerun()
 
     with col_n2:
-        st.markdown("<h3 style='color: #0284c7;'>🧐 Hasil & Rincian Logika Perhitungan</h3>", unsafe_allow_html=True)
+        st.markdown("<h3 style='color: #38bdf8;'>🧐 Hasil & Rincian Logika Perhitungan</h3>", unsafe_allow_html=True)
         if "pembahasan_do" in st.session_state:
             if st.session_state["status_do"] == "MEMENUHI SYARAT":
                 st.success(f"🎉 HASIL: {st.session_state['nilai_do']:.4f} mg/L ({st.session_state['status_do']})")
@@ -535,7 +548,7 @@ elif pilih_fitur == "Perhitungan DO":
 
 # 📊 DATABASE RIWAYAT SAMPEL
 elif pilih_fitur == "Database Riwayat Sampel":
-    st.markdown("<h1 style='color: #0284c7;'>📊 Rekam Data Kualitas Air Permanen</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='color: #38bdf8;'>📊 Rekam Data Kualitas Air Permanen</h1>", unsafe_allow_html=True)
     st.markdown("---")
     if logs_saat_ini:
         st.table(logs_saat_ini)
@@ -549,7 +562,7 @@ elif pilih_fitur == "Database Riwayat Sampel":
 
 # 🧠 INTELIGENSIA & KONSULTASI AI
 elif pilih_fitur == "Inteligensia & Konsultasi AI":
-    st.markdown("<h1 style='color: #0284c7;'>🧠 Pusat Kendali Pengetahuan & Konsultasi AI</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='color: #38bdf8;'>🧠 Pusat Kendali Pengetahuan & Konsultasi AI</h1>", unsafe_allow_html=True)
     st.markdown("---")
     col_a1, col_a2 = st.columns(2)
     with col_a1:
