@@ -6,7 +6,7 @@ import os
 import hashlib
 
 # ==============================================================================
-# PROYEK: WATER QUALITY ANALYTICS SYSTEM (MULTI-USER SECURITY EDITION - REVISED)
+# PROYEK: WATER QUALITY ANALYTICS SYSTEM (MULTI-USER BENEFITS EDITION)
 # ==============================================================================
 
 st.set_page_config(page_title="Water Quality Analytics System", page_icon="💧", layout="wide")
@@ -299,6 +299,16 @@ st.markdown(f"""
         background: rgba(30, 41, 59, 0.55); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
         padding: 22px; border-radius: 14px; border: 1px solid rgba(74, 222, 128, 0.25); border-left: 6px solid #22c55e; color: #f1f5f9; margin-bottom: 15px;
     }}
+    .benefit-container {{
+        background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(10px);
+        padding: 25px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.1); margin-top: 15px;
+    }}
+    .benefit-item {{
+        padding: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); display: flex; align-items: flex-start;
+    }}
+    .benefit-icon {{ font-size: 20px; margin-right: 15px; margin-top: 2px; }}
+    .benefit-title {{ font-weight: 700; color: #38bdf8 !important; font-size: 16px; }}
+    .benefit-desc {{ color: #cbd5e1 !important; font-size: 14.5px; margin-top: 3px; }}
     .calc-box {{
         background: rgba(15, 23, 42, 0.85); border: 1px dashed #38bdf8; border-radius: 8px; padding: 15px;
         font-family: 'Courier New', Courier, monospace; color: #38bdf8 !important; margin-top: 10px;
@@ -369,7 +379,7 @@ else:
         
         pilih_fitur = st.radio(
             "📌 Pilih Fitur Utama:",
-            ["Beranda", "Perhitungan BOD", "Perhitungan COD", "Perhitungan TSS", "Perhitungan DO", "Database Riwayat Sampel", "Inteligensia &amp; Konsultasi AI"]
+            ["Beranda", "Perhitungan BOD", "Perhitungan COD", "Perhitungan TSS", "Perhitungan DO", "Database Riwayat Sampel", "Inteligensia & Konsultasi AI"]
         )
         st.markdown("---")
         
@@ -387,17 +397,59 @@ else:
 
     # --- KONTEN UTAMA DASHBOARD ---
 
-    # 🏠 BERANDA
+    # 🏠 BERANDA (SUDAH DIREVISI MENAMPILKAN MANFAAT APLIKASI)
     if pilih_fitur == "Beranda":
         st.markdown("<p class='main-title'>💧 Water Quality Analytics System</p>", unsafe_allow_html=True)
         st.caption(f"Dashboard Terenkripsi Keamanan — Selamat Bekerja, Laboran {current_user}")
         st.markdown("---")
         
-        col_ref1, col_ref2 = st.columns(2)
-        with col_ref1:
-            st.markdown("<div class='card-box-1'><h3 style='color: #38bdf8; margin-top:0px;'>🎯 Akun Terisolasi</h3><p>Database saat ini hanya menampilkan data yang diinput oleh akun Anda sendiri. Anggota kelompok atau laboran lain tidak bisa melihat atau mengacaukan riwayat Anda.</p></div>", unsafe_allow_html=True)
-        with col_ref2:
-            st.markdown("<div class='card-box-2'><h3 style='color: #4ade80; margin-top:0px;'>📚 Manfaat AI</h3><p>AI akan menganalisis kecenderungan fluktuasi sampel berdasarkan histori pengujian pribadi Anda demi menyusun narasi Bab Pembahasan.</p></div>", unsafe_allow_html=True)
+        st.markdown("### 📘 Manfaat Utama Aplikasi")
+        st.markdown("""
+        <div class="benefit-container">
+            <div class="benefit-item">
+                <span class="benefit-icon">🔒</span>
+                <div>
+                    <div class="benefit-title">Keamanan & Isolasi Data Terenkripsi</div>
+                    <div class="benefit-desc">Menjamin data hasil praktikum antar-laboran tidak akan bercampur atau saling menabrak karena setiap akun memiliki penyimpanan database lokal (v3.db) yang terisolasi secara mandiri.</div>
+                </div>
+            </div>
+            <div class="benefit-item">
+                <span class="benefit-icon">⚡</span>
+                <div>
+                    <div class="benefit-title">Otomatisasi Kalkulasi Komputasi</div>
+                    <div class="benefit-desc">Mengeliminasi risiko kesalahan manusia (human error) dalam pengolahan data laboratorium dengan menghitung parameter kompleks BOD, COD, TSS, dan DO secara real-time dan akurat.</div>
+                </div>
+            </div>
+            <div class="benefit-item">
+                <span class="benefit-icon">📊</span>
+                <div>
+                    <div class="benefit-title">Transparansi Metodologi Analisis</div>
+                    <div class="benefit-desc">Memudahkan verifikasi data karena aplikasi menampilkan breakdown substitusi rumus matematika kimia secara runtut langsung di panel hasil pengujian.</div>
+                </div>
+            </div>
+            <div class="benefit-item">
+                <span class="benefit-icon">🧠</span>
+                <div>
+                    <div class="benefit-title">Efisiensi Penyusunan Laporan (AI Generation)</div>
+                    <div class="benefit-desc">Mempercepat pengerjaan Bab Pembahasan laporan lewat algoritma cerdas yang otomatis menyusun narasi evaluasi dalam format paragraf kontinu, lengkap dengan komparasi regulasi baku mutu lingkungan (PP No. 22 Tahun 2021).</div>
+                </div>
+            </div>
+            <div class="benefit-item">
+                <span class="benefit-icon">💾</span>
+                <div>
+                    <div class="benefit-title">Pusat Rekam Data Elektronik Permanen</div>
+                    <div class="benefit-desc">Menyediakan log riwayat pengujian digital yang rapi dan terstruktur berbasis SQLite untuk memantau tren fluktuasi kualitas air dari waktu ke waktu.</div>
+                </div>
+            </div>
+            <div class="benefit-item">
+                <span class="benefit-icon">💬</span>
+                <div>
+                    <div class="benefit-title">Asisten Validasi Interaktif</div>
+                    <div class="benefit-desc">Memfasilitasi konsultasi materi lab dan pengujian SOP baru kapan saja melalui fitur chatbot cerdas yang terintegrasi memori jangka panjang.</div>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
     # 🧪 PERHITUNGAN BOD
     elif pilih_fitur == "Perhitungan BOD":
@@ -412,7 +464,7 @@ else:
             do_5 = st.number_input("Kadar DO Hari Ke-5 (DO5) (mg/L):", value=4.5000, format="%.4f")
             f_pengenceran = st.number_input("Faktor Pengenceran (P):", value=2.0, step=0.5)
             
-            if st.button("🔥 Hitung &amp; Simpan Data BOD", use_container_width=True):
+            if st.button("🔥 Hitung & Simpan Data BOD", use_container_width=True):
                 hasil = hitung_bod(do_0, do_5, f_pengenceran)
                 status = "MEMENUHI SYARAT" if hasil <= bod_max else "MELEBIHI AMBANG"
                 biner_id = desimal_ke_biner(len(get_water_logs(current_user)) + 1)
@@ -425,7 +477,7 @@ else:
                 st.rerun()
 
         with col_l2:
-            st.markdown("<h3 style='color: #38bdf8;'>🧐 Hasil &amp; Rincian Logika Perhitungan</h3>", unsafe_allow_html=True)
+            st.markdown("<h3 style='color: #38bdf8;'>🧐 Hasil & Rincian Logika Perhitungan</h3>", unsafe_allow_html=True)
             if "pembahasan_bod" in st.session_state:
                 if st.session_state["status_bod"] == "MEMENUHI SYARAT":
                     st.success(f"🎉 HASIL: {st.session_state['nilai_bod']:.4f} mg/L ({st.session_state['status_bod']})")
@@ -450,7 +502,7 @@ else:
             n_fas = st.number_input("Normalitas Larutan FAS (N):", value=0.1000, format="%.4f")
             vol_air = st.number_input("Volume Sampel Air Teruji (mL):", value=50.00, format="%.2f")
             
-            if st.button("🔥 Hitung &amp; Simpan Data COD", use_container_width=True):
+            if st.button("🔥 Hitung & Simpan Data COD", use_container_width=True):
                 hasil = hitung_cod(v_blanko, v_sampel, n_fas, vol_air)
                 status = "MEMENUHI SYARAT" if hasil <= cod_max else "MELEBIHI AMBANG"
                 biner_id = desimal_ke_biner(len(get_water_logs(current_user)) + 1)
@@ -463,7 +515,7 @@ else:
                 st.rerun()
 
         with col_l2:
-            st.markdown("<h3 style='color: #38bdf8;'>🧐 Hasil &amp; Rincian Logika Perhitungan</h3>", unsafe_allow_html=True)
+            st.markdown("<h3 style='color: #38bdf8;'>🧐 Hasil & Rincian Logika Perhitungan</h3>", unsafe_allow_html=True)
             if "pembahasan_cod" in st.session_state:
                 if st.session_state["status_cod"] == "MEMENUHI SYARAT":
                     st.success(f"🎉 HASIL: {st.session_state['nilai_cod']:.4f} mg/L ({st.session_state['status_cod']})")
@@ -487,7 +539,7 @@ else:
             b_akhir = st.number_input("Berat Kertas Saring + Padatan Kering (gram):", value=1.2455, format="%.4f")
             v_air_tss = st.number_input("Volume Sampel Air yang Disaring (mL):", value=100.00, format="%.2f")
             
-            if st.button("🔥 Hitung &amp; Simpan Data TSS", use_container_width=True):
+            if st.button("🔥 Hitung & Simpan Data TSS", use_container_width=True):
                 hasil = hitung_tss(b_akhir, b_awal, v_air_tss)
                 status = "MEMENUHI SYARAT" if hasil <= tss_max else "MELEBIHI AMBANG"
                 biner_id = desimal_ke_biner(len(get_water_logs(current_user)) + 1)
@@ -500,7 +552,7 @@ else:
                 st.rerun()
 
         with col_n2:
-            st.markdown("<h3 style='color: #38bdf8;'>🧐 Hasil &amp; Rincian Logika Perhitungan</h3>", unsafe_allow_html=True)
+            st.markdown("<h3 style='color: #38bdf8;'>🧐 Hasil & Rincian Logika Perhitungan</h3>", unsafe_allow_html=True)
             if "pembahasan_tss" in st.session_state:
                 if st.session_state["status_tss"] == "MEMENUHI SYARAT":
                     st.success(f"🎉 HASIL: {st.session_state['nilai_tss']:.4f} mg/L ({st.session_state['status_tss']})")
@@ -524,7 +576,7 @@ else:
             n_thio = st.number_input("Normalitas Larutan Thiosulfat (N):", value=0.0250, format="%.4f")
             v_botol = st.number_input("Volume Botol DO yang Digunakan (mL):", value=250.00, format="%.2f")
             
-            if st.button("🔥 Hitung &amp; Simpan Data DO", use_container_width=True):
+            if st.button("🔥 Hitung & Simpan Data DO", use_container_width=True):
                 hasil = hitung_do(v_thio, n_thio, v_botol)
                 status = "MEMENUHI SYARAT" if hasil >= do_min else "DI BAWAH MINIMUM"
                 biner_id = desimal_ke_biner(len(get_water_logs(current_user)) + 1)
@@ -537,7 +589,7 @@ else:
                 st.rerun()
 
         with col_n2:
-            st.markdown("<h3 style='color: #38bdf8;'>🧐 Hasil &amp; Rincian Logika Perhitungan</h3>", unsafe_allow_html=True)
+            st.markdown("<h3 style='color: #38bdf8;'>🧐 Hasil & Rincian Logika Perhitungan</h3>", unsafe_allow_html=True)
             if "pembahasan_do" in st.session_state:
                 if st.session_state["status_do"] == "MEMENUHI SYARAT":
                     st.success(f"🎉 HASIL: {st.session_state['nilai_do']:.4f} mg/L ({st.session_state['status_do']})")
@@ -562,8 +614,8 @@ else:
             st.info("Belum ada riwayat pengujian sampel air yang tersimpan di akun Anda.")
 
     # 🧠 INTELIGENSIA & KONSULTASI AI
-    elif pilih_fitur == "Inteligensia &amp; Konsultasi AI":
-        st.markdown("<h1 style='color: #38bdf8;'>🧠 Pusat Kendali Pengetahuan &amp; Konsultasi AI</h1>", unsafe_allow_html=True)
+    elif pilih_fitur == "Inteligensia & Konsultasi AI":
+        st.markdown("<h1 style='color: #38bdf8;'>🧠 Pusat Kendali Pengetahuan & Konsultasi AI</h1>", unsafe_allow_html=True)
         st.markdown("---")
         col_a1, col_a2 = st.columns(2)
         with col_a1:
