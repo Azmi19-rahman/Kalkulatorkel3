@@ -6,7 +6,7 @@ import os
 import hashlib
 
 # ==============================================================================
-# PROYEK: WATER QUALITY ANALYTICS SYSTEM (MULTI-USER BENEFITS EDITION)
+# PROYEK: WATER QUALITY ANALYTICS SYSTEM (BIG TITLE & THEORY EDITION)
 # ==============================================================================
 
 st.set_page_config(page_title="Water Quality Analytics System", page_icon="💧", layout="wide")
@@ -287,17 +287,21 @@ st.markdown(f"""
         border-right: 1px solid rgba(51, 65, 85, 0.5);
     }}
     .main-title {{
-        font-size: 38px; font-weight: 800;
+        font-size: 42px; font-weight: 800;
         background: linear-gradient(45deg, #38bdf8, #60a5fa);
         -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        margin-bottom: 5px;
     }}
-    .card-box-1 {{
-        background: rgba(30, 41, 59, 0.55); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-        padding: 22px; border-radius: 14px; border: 1px solid rgba(56, 189, 248, 0.25); border-left: 6px solid #0ea5e9; color: #f1f5f9; margin-bottom: 15px;
+    .section-title {{
+        font-size: 34px; font-weight: 800;
+        color: #38bdf8 !important;
+        border-bottom: 2px solid rgba(56, 189, 248, 0.3);
+        padding-bottom: 8px; margin-bottom: 15px;
     }}
-    .card-box-2 {{
-        background: rgba(30, 41, 59, 0.55); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-        padding: 22px; border-radius: 14px; border: 1px solid rgba(74, 222, 128, 0.25); border-left: 6px solid #22c55e; color: #f1f5f9; margin-bottom: 15px;
+    .theory-box {{
+        background: rgba(30, 41, 59, 0.45); backdrop-filter: blur(10px);
+        padding: 20px; border-radius: 12px; border-left: 5px solid #38bdf8;
+        color: #cbd5e1 !important; font-size: 15px; line-height: 1.6; margin-bottom: 25px;
     }}
     .benefit-container {{
         background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(10px);
@@ -377,7 +381,7 @@ else:
         st.markdown("<p style='font-style: italic; color: #94a3b8; margin-top:0px;'>Politeknik AKA Bogor</p>", unsafe_allow_html=True)
         st.markdown("---")
         
-        pilih_fitur = st.radio(
+        pilih_fitur = st.sidebar.radio(
             "📌 Pilih Fitur Utama:",
             ["Beranda", "Perhitungan BOD", "Perhitungan COD", "Perhitungan TSS", "Perhitungan DO", "Database Riwayat Sampel", "Inteligensia & Konsultasi AI"]
         )
@@ -397,7 +401,7 @@ else:
 
     # --- KONTEN UTAMA DASHBOARD ---
 
-    # 🏠 BERANDA (SUDAH DIREVISI MENAMPILKAN MANFAAT APLIKASI)
+    # 🏠 BERANDA
     if pilih_fitur == "Beranda":
         st.markdown("<p class='main-title'>💧 Water Quality Analytics System</p>", unsafe_allow_html=True)
         st.caption(f"Dashboard Terenkripsi Keamanan — Selamat Bekerja, Laboran {current_user}")
@@ -424,7 +428,7 @@ else:
                 <span class="benefit-icon">📊</span>
                 <div>
                     <div class="benefit-title">Transparansi Metodologi Analisis</div>
-                    <div class="benefit-desc">Memudahkan verifikasi data karena aplikasi menampilkan breakdown substitusi rumus matematika kimia secara runtut langsung di panel hasil pengujian.</div>
+                    <div class="benefit-desc">Memhadapkan verifikasi data karena aplikasi menampilkan breakdown substitusi rumus matematika kimia secara runtut langsung di panel hasil pengujian.</div>
                 </div>
             </div>
             <div class="benefit-item">
@@ -453,8 +457,15 @@ else:
 
     # 🧪 PERHITUNGAN BOD
     elif pilih_fitur == "Perhitungan BOD":
-        st.markdown("<h1 style='color: #38bdf8;'>🧪 Input Analisis Parameter BOD</h1>", unsafe_allow_html=True)
-        st.markdown("---")
+        st.markdown("<p class='section-title'>🧪 Analisis & Perhitungan Parameter BOD</p>", unsafe_allow_html=True)
+        
+        # Penjelasan Paragraf Kontinu Sebelum Form Input
+        st.markdown("""
+        <div class="theory-box">
+        Pengujian Biochemical Oxygen Demand (BOD) bertujuan untuk mengukur volume oksigen terlarut yang dikonsumsi oleh populasi mikroorganisme dalam mendekomposisi bahan organik yang terkandung di dalam sampel air selama masa inkubasi 5 hari pada suhu konstan 20°C di ruang gelap. Tingginya kadar nilai parameter BOD mengindikasikan tingginya tingkat pencemaran limbah organik pada badan sungai, yang memicu penurunan kualitas ekosistem perairan akibat percepatan konsumsi oksigen oleh mikroba pembusuk. Penentuan nilai ini secara konvensional dilakukan melalui metode titrasi iodometri (titrasi winkler) atau menggunakan sensor DO probe dengan menghitung selisih matematis antara kadar oksigen mula-mula (DO hari ke-0) dengan sisa kadar oksigen setelah inkubasi (DO hari ke-5) dikalikan dengan faktor pengenceran sampel yang digunakan.
+        </div>
+        """, unsafe_allow_html=True)
+        
         bod_max = st.number_input("🚨 Batas Maks Baku Mutu BOD (mg/L):", value=6.0000, step=0.5000, format="%.4f")
         
         col_l1, col_l2 = st.columns([1.3, 1.3])
@@ -490,8 +501,15 @@ else:
 
     # 🧪 PERHITUNGAN COD
     elif pilih_fitur == "Perhitungan COD":
-        st.markdown("<h1 style='color: #38bdf8;'>🧪 Input Analisis Parameter COD</h1>", unsafe_allow_html=True)
-        st.markdown("---")
+        st.markdown("<p class='section-title'>🧪 Analisis & Perhitungan Parameter COD</p>", unsafe_allow_html=True)
+        
+        # Penjelasan Paragraf Kontinu Sebelum Form Input
+        st.markdown("""
+        <div class="theory-box">
+        Pengujian Chemical Oxygen Demand (COD) adalah parameter analitik dasar untuk menentukan jumlah total oksigen yang dibutuhkan guna mengoksidasi seluruh bahan organik secara kimiawi, baik yang mudah terurai (biodegradable) maupun yang sukar terurai (non-biodegradable) di dalam air sampel. Pengujian ini memanfaatkan oksidator kuat berupa Kalium Dikromat (K2Cr2O7) dalam kondisi asam pekat yang dipanaskan dengan refluks bersama bantuan katalis Perak Sulfat (Ag2SO4). Sisa dikromat yang tidak tereduksi selama proses destruksi kemudian dititrasi kembali menggunakan larutan standar Ferro Ammonium Sulfat (FAS) dengan indikator ferroin, di mana volume penitran akan dibandingkan langsung terhadap volume blanko murni untuk menghitung nilai konsentrasi beban pencemaran limbah industri secara akurat dalam satuan mg/L.
+        </div>
+        """, unsafe_allow_html=True)
+        
         cod_max = st.number_input("🚨 Batas Maks Baku Mutu COD (mg/L):", value=25.0000, step=1.0000, format="%.4f")
         
         col_l1, col_l2 = st.columns([1.3, 1.3])
@@ -528,8 +546,15 @@ else:
 
     # ⚖️ PERHITUNGAN TSS
     elif pilih_fitur == "Perhitungan TSS":
-        st.markdown("<h1 style='color: #38bdf8;'>⚖️ Input Analisis Parameter TSS</h1>", unsafe_allow_html=True)
-        st.markdown("---")
+        st.markdown("<p class='section-title'>⚖️ Analisis & Perhitungan Parameter TSS</p>", unsafe_allow_html=True)
+        
+        # Penjelasan Paragraf Kontinu Sebelum Form Input
+        st.markdown("""
+        <div class="theory-box">
+        Penetapan kadar Total Suspended Solids (TSS) atau total padatan tersuspensi merupakan pengujian gravimetri kuantitatif untuk mengukur berat bersih material padat kasar yang tidak larut dan tersuspensi di dalam air sampel dengan diameter partikel lebih besar dari 1 mikrometer. Alur prosedural analisis ini dijalankan dengan menyaring volume air tertentu melewati media filter kertas saring Whatman bebas abu yang telah dikondisikan berat awalnya, kemudian residu padatan yang tertahan dikeringkan di dalam oven laboratorium ber-SOP pada suhu konstan 103°C hingga 105°C hingga mencapai berat konstan. Selisih penimbangan neraca analitik antara berat cawan saring akhir dengan berat kosong awal dikonversi secara matematis menjadi konsentrasi bobot padatan suspensi lingkungan badan sungai.
+        </div>
+        """, unsafe_allow_html=True)
+        
         tss_max = st.number_input("🚨 Batas Maks Baku Mutu TSS (mg/L):", value=50.0000, step=5.0000, format="%.4f")
         
         col_n1, col_n2 = st.columns([1.3, 1.3])
@@ -565,8 +590,15 @@ else:
 
     # 🧪 PERHITUNGAN DO
     elif pilih_fitur == "Perhitungan DO":
-        st.markdown("<h1 style='color: #38bdf8;'>🧪 Input Analisis Parameter DO</h1>", unsafe_allow_html=True)
-        st.markdown("---")
+        st.markdown("<p class='section-title'>🧪 Analisis & Perhitungan Parameter DO (Dissolved Oxygen)</p>", unsafe_allow_html=True)
+        
+        # Penjelasan Paragraf Kontinu Sebelum Form Input
+        st.markdown("""
+        <div class="theory-box">
+        Analisis Dissolved Oxygen (DO) atau kadar gas oksigen terlarut merupakan indikator krusial yang menentukan tingkat vitalitas kesehatan respirasi biota perairan alami. Pengukuran dilakukan di laboratorium menggunakan metode titrasi iodometri modifikasi azida (Metode Winkler), di mana sampel air lapangan diikat terlebih dahulu di dalam botol DO khusus menggunakan MnSO4 dan pereaksi alkali-iodida-azida hingga membentuk endapan cokelat mangan hidroksida. Endapan beroksigen tersebut kemudian dilarutkan kembali dengan penambahan asam sulfat pekat (H2SO4) untuk membebaskan iodium murni secara ekivalen yang ditandai oleh perubahan warna, yang mana jumlah iodium bebas tersebut segera dititrasi menggunakan larutan baku sekunder Natrium Thiosulfat (Na2S2O3) dengan indikator amilum cair hingga warna biru gelap menghilang secara konstan.
+        </div>
+        """, unsafe_allow_html=True)
+        
         do_min = st.number_input("🚨 Batas Minimum Baku Mutu DO (mg/L):", value=4.0000, step=0.5000, format="%.4f")
         
         col_n1, col_n2 = st.columns([1.3, 1.3])
@@ -602,7 +634,7 @@ else:
 
     # 📊 DATABASE RIWAYAT SAMPEL
     elif pilih_fitur == "Database Riwayat Sampel":
-        st.markdown(f"<h1 style='color: #38bdf8;'>📊 Rekam Data Kualitas Air Akun: {current_user}</h1>", unsafe_allow_html=True)
+        st.markdown(f"<p class='section-title'>📊 Rekam Data Kualitas Air Akun: {current_user}</p>", unsafe_allow_html=True)
         st.markdown("---")
         if logs_saat_ini:
             st.table(logs_saat_ini)
@@ -615,7 +647,7 @@ else:
 
     # 🧠 INTELIGENSIA & KONSULTASI AI
     elif pilih_fitur == "Inteligensia & Konsultasi AI":
-        st.markdown("<h1 style='color: #38bdf8;'>🧠 Pusat Kendali Pengetahuan & Konsultasi AI</h1>", unsafe_allow_html=True)
+        st.markdown(f"<p class='section-title'>🧠 Pusat Kendali Pengetahuan & Konsultasi AI</p>", unsafe_allow_html=True)
         st.markdown("---")
         col_a1, col_a2 = st.columns(2)
         with col_a1:
