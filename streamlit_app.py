@@ -6,7 +6,7 @@ import os
 import hashlib
 
 # ==============================================================================
-# PROYEK: WATER QUALITY ANALYTICS SYSTEM (BIG TITLE & THEORY EDITION)
+# PROYEK: WATER QUALITY ANALYTICS SYSTEM (BIG TITLE, THEORY & DECIMAL ID EDITION)
 # ==============================================================================
 
 st.set_page_config(page_title="Water Quality Analytics System", page_icon="💧", layout="wide")
@@ -48,7 +48,7 @@ def init_db():
             username TEXT PRIMARY KEY, password TEXT
         )
     """)
-    # Tabel Log Air (Sudah mengikat kolom 'username')
+    # Tabel Log Air
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS water_log (
             username TEXT, id_biner TEXT, sampel TEXT, parameter TEXT, nilai REAL, status TEXT, keterangan TEXT
@@ -64,7 +64,7 @@ def init_db():
     cursor.execute("SELECT COUNT(*) FROM ai_knowledge")
     if cursor.fetchone()[0] == 0:
         knowledge_awal = [
-            ("bod", "BOD (Biochemical Oxygen Demand) merupakan takaran jumlah oksigen terlarut yang diperlukan oleh mikroorganisme untuk mendekomposisi bahan organik dalam air selama 5 hari."),
+            ("bod", "BOD (Biochemical Oxygen Demand) merupakan takaran jumlah oksigen terlarut yang diperlukan oleh mikroorganisme untuk mendekomposisi bahan organik dalam air selama 5 days."),
             ("cod", "COD (Chemical Oxygen Demand) adalah jumlah total oksigen yang dibutuhkan untuk mengurai seluruh bahan organik melalui reaksi kimia menggunakan oksidator kuat."),
             ("tss", "TSS (Total Suspended Solids) adalah material padatan tersuspensi (diameter > 1 mikrometer) yang tertahan pada media penyaring seperti kertas saring Whatman 41 setelah dikeringkan pada suhu 103-105°C."),
             ("do", "DO (Dissolved Oxygen) atau oksigen terlarut menunjukkan volume gas oksigen yang terkandung di dalam air. Kadar DO yang tinggi menandakan kualitas air yang baik untuk kehidupan akuatik."),
@@ -140,7 +140,7 @@ def get_ai_knowledge():
 
 
 # ==============================================================================
-# 🛠️ LOGIKA RUMUS KIMIA ANALISIS AIR
+# 🛠️ LOGIKA RUMUS KIMIA & KONVERSI NUMERIK
 # ==============================================================================
 def desimal_ke_biner(desimal):
     if desimal == 0: return "0"
@@ -150,6 +150,18 @@ def desimal_ke_biner(desimal):
         biner = str(temp % 2) + biner
         temp = temp // 2
     return biner
+
+def biner_ke_desimal(biner):
+    try:
+        desimal = 0
+        pangkat = 0
+        for digit in reversed(str(biner)):
+            if digit == '1':
+                desimal += 2 ** pangkat
+            pangkat += 1
+        return desimal
+    except Exception:
+        return biner
 
 def hitung_bod(do_nol, do_lima, pengenceran):
     try: return round((do_nol - do_lima) * pengenceran, 4)
@@ -232,43 +244,7 @@ def ai_chatbot_brain(username, pertanyaan):
 # 📱 FRONTEND & CUSTOM INTERFACE
 # ==============================================================================
 
-# 🌌 1. Animasi Gelembung Kaca Laboratorium 3D
-st.markdown("""
-    <canvas id="customLabCanvas" style="position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:-1; pointer-events:none; opacity:0.85;"></canvas>
-    <script>
-    const canvas = document.getElementById('customLabCanvas');
-    const ctx = canvas.getContext('2d');
-    function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-    window.addEventListener('resize', resize); resize();
-    const bubbles = [];
-    for(let i=0; i<28; i++) {
-        bubbles.push({
-            x: Math.random() * canvas.width, y: canvas.height + Math.random() * 200,
-            radius: Math.random() * 7 + 3, speed: Math.random() * 0.7 + 0.3,
-            wobble: Math.random() * 2, wobbleSpeed: Math.random() * 0.015, opacity: Math.random() * 0.5 + 0.3
-        });
-    }
-    function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        bubbles.forEach(b => {
-            b.y -= b.speed; b.wobble += b.wobbleSpeed; b.x += Math.sin(b.wobble) * 0.3;
-            if(b.y < -20) { b.y = canvas.height + 20; b.x = Math.random() * canvas.width; }
-            let gradient = ctx.createRadialGradient(b.x - b.radius*0.2, b.y - b.radius*0.2, b.radius * 0.05, b.x, b.y, b.radius);
-            gradient.addColorStop(0, `rgba(255, 255, 255, ${b.opacity + 0.3})`);
-            gradient.addColorStop(0.5, `rgba(135, 206, 250, ${b.opacity * 0.3})`);
-            gradient.addColorStop(1, `rgba(30, 144, 255, ${b.opacity * 0.6})`);
-            ctx.beginPath(); ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2); ctx.fillStyle = gradient;
-            ctx.strokeStyle = `rgba(255, 255, 255, ${b.opacity * 0.4})`; ctx.lineWidth = 0.8; ctx.stroke(); ctx.fill();
-            ctx.beginPath(); ctx.arc(b.x - b.radius * 0.25, b.y - b.radius * 0.25, b.radius * 0.12, 0, Math.PI * 2);
-            ctx.fillStyle = "rgba(255, 255, 255, 0.7)"; ctx.fill();
-        });
-        requestAnimationFrame(draw);
-    }
-    draw();
-    </script>
-""", unsafe_allow_html=True)
-
-# 🎨 2. CSS Kustom Dark Glassmorphism Elegance
+# CSS Kustom Dark Glassmorphism Elegance
 if img_base64:
     bg_style = f"""
     background: linear-gradient(135deg, rgba(15, 23, 42, 0.90) 0%, rgba(8, 15, 30, 0.94) 100%), 
@@ -286,12 +262,23 @@ st.markdown(f"""
         backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
         border-right: 1px solid rgba(51, 65, 85, 0.5);
     }}
+    
+    /* 🚨 REVISI UKURAN: JUDUL UTAMA DAN SUB-JUDUL DIPERBESAR ELEGAN */
     .main-title {{
-        font-size: 42px; font-weight: 800;
+        font-size: 54px !important; 
+        font-weight: 800;
         background: linear-gradient(45deg, #38bdf8, #60a5fa);
         -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        margin-bottom: 5px;
+        margin-bottom: 12px;
+        line-height: 1.2;
     }}
+    .sub-caption {{
+        font-size: 20px !important;
+        color: #94a3b8 !important;
+        font-weight: 500;
+        margin-bottom: 25px;
+    }}
+    
     .section-title {{
         font-size: 34px; font-weight: 800;
         color: #38bdf8 !important;
@@ -341,7 +328,7 @@ if "username" not in st.session_state:
 # --- TAMPILAN JIKA BELUM LOGIN ---
 if not st.session_state["logged_in"]:
     st.markdown("<p class='main-title' style='text-align:center; margin-top:50px;'>💧 Water Quality Analytics System</p>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align:center; color:#94a3b8 !important;'>Silakan Login atau Daftarkan Akun Laboran Anda</p>", unsafe_allow_html=True)
+    st.markdown("<p class='sub-caption' style='text-align:center;'>Silakan Login atau Daftarkan Akun Laboran Anda</p>", unsafe_allow_html=True)
     
     col_log1, col_log2, col_log3 = st.columns([1, 1.5, 1])
     with col_log2:
@@ -404,7 +391,7 @@ else:
     # 🏠 BERANDA
     if pilih_fitur == "Beranda":
         st.markdown("<p class='main-title'>💧 Water Quality Analytics System</p>", unsafe_allow_html=True)
-        st.caption(f"Dashboard Terenkripsi Keamanan — Selamat Bekerja, Laboran {current_user}")
+        st.markdown(f"<p class='sub-caption'>Dashboard Terenkripsi Keamanan — Selamat Bekerja, Laboran {current_user}</p>", unsafe_allow_html=True)
         st.markdown("---")
         
         st.markdown("### 📘 Manfaat Utama Aplikasi")
@@ -428,7 +415,7 @@ else:
                 <span class="benefit-icon">📊</span>
                 <div>
                     <div class="benefit-title">Transparansi Metodologi Analisis</div>
-                    <div class="benefit-desc">Memhadapkan verifikasi data karena aplikasi menampilkan breakdown substitusi rumus matematika kimia secara runtut langsung di panel hasil pengujian.</div>
+                    <div class="benefit-desc">Memudahkan verifikasi data karena aplikasi menampilkan breakdown substitusi rumus matematika kimia secara runtut langsung di panel hasil pengujian.</div>
                 </div>
             </div>
             <div class="benefit-item">
@@ -459,7 +446,6 @@ else:
     elif pilih_fitur == "Perhitungan BOD":
         st.markdown("<p class='section-title'>🧪 Analisis & Perhitungan Parameter BOD</p>", unsafe_allow_html=True)
         
-        # Penjelasan Paragraf Kontinu Sebelum Form Input
         st.markdown("""
         <div class="theory-box">
         Pengujian Biochemical Oxygen Demand (BOD) bertujuan untuk mengukur volume oksigen terlarut yang dikonsumsi oleh populasi mikroorganisme dalam mendekomposisi bahan organik yang terkandung di dalam sampel air selama masa inkubasi 5 hari pada suhu konstan 20°C di ruang gelap. Tingginya kadar nilai parameter BOD mengindikasikan tingginya tingkat pencemaran limbah organik pada badan sungai, yang memicu penurunan kualitas ekosistem perairan akibat percepatan konsumsi oksigen oleh mikroba pembusuk. Penentuan nilai ini secara konvensional dilakukan melalui metode titrasi iodometri (titrasi winkler) atau menggunakan sensor DO probe dengan menghitung selisih matematis antara kadar oksigen mula-mula (DO hari ke-0) dengan sisa kadar oksigen setelah inkubasi (DO hari ke-5) dikalikan dengan faktor pengenceran sampel yang digunakan.
@@ -503,7 +489,6 @@ else:
     elif pilih_fitur == "Perhitungan COD":
         st.markdown("<p class='section-title'>🧪 Analisis & Perhitungan Parameter COD</p>", unsafe_allow_html=True)
         
-        # Penjelasan Paragraf Kontinu Sebelum Form Input
         st.markdown("""
         <div class="theory-box">
         Pengujian Chemical Oxygen Demand (COD) adalah parameter analitik dasar untuk menentukan jumlah total oksigen yang dibutuhkan guna mengoksidasi seluruh bahan organik secara kimiawi, baik yang mudah terurai (biodegradable) maupun yang sukar terurai (non-biodegradable) di dalam air sampel. Pengujian ini memanfaatkan oksidator kuat berupa Kalium Dikromat (K2Cr2O7) dalam kondisi asam pekat yang dipanaskan dengan refluks bersama bantuan katalis Perak Sulfat (Ag2SO4). Sisa dikromat yang tidak tereduksi selama proses destruksi kemudian dititrasi kembali menggunakan larutan standar Ferro Ammonium Sulfat (FAS) dengan indikator ferroin, di mana volume penitran akan dibandingkan langsung terhadap volume blanko murni untuk menghitung nilai konsentrasi beban pencemaran limbah industri secara akurat dalam satuan mg/L.
@@ -548,7 +533,6 @@ else:
     elif pilih_fitur == "Perhitungan TSS":
         st.markdown("<p class='section-title'>⚖️ Analisis & Perhitungan Parameter TSS</p>", unsafe_allow_html=True)
         
-        # Penjelasan Paragraf Kontinu Sebelum Form Input
         st.markdown("""
         <div class="theory-box">
         Penetapan kadar Total Suspended Solids (TSS) atau total padatan tersuspensi merupakan pengujian gravimetri kuantitatif untuk mengukur berat bersih material padat kasar yang tidak larut dan tersuspensi di dalam air sampel dengan diameter partikel lebih besar dari 1 mikrometer. Alur prosedural analisis ini dijalankan dengan menyaring volume air tertentu melewati media filter kertas saring Whatman bebas abu yang telah dikondisikan berat awalnya, kemudian residu padatan yang tertahan dikeringkan di dalam oven laboratorium ber-SOP pada suhu konstan 103°C hingga 105°C hingga mencapai berat konstan. Selisih penimbangan neraca analitik antara berat cawan saring akhir dengan berat kosong awal dikonversi secara matematis menjadi konsentrasi bobot padatan suspensi lingkungan badan sungai.
@@ -592,7 +576,6 @@ else:
     elif pilih_fitur == "Perhitungan DO":
         st.markdown("<p class='section-title'>🧪 Analisis & Perhitungan Parameter DO (Dissolved Oxygen)</p>", unsafe_allow_html=True)
         
-        # Penjelasan Paragraf Kontinu Sebelum Form Input
         st.markdown("""
         <div class="theory-box">
         Analisis Dissolved Oxygen (DO) atau kadar gas oksigen terlarut merupakan indikator krusial yang menentukan tingkat vitalitas kesehatan respirasi biota perairan alami. Pengukuran dilakukan di laboratorium menggunakan metode titrasi iodometri modifikasi azida (Metode Winkler), di mana sampel air lapangan diikat terlebih dahulu di dalam botol DO khusus menggunakan MnSO4 dan pereaksi alkali-iodida-azida hingga membentuk endapan cokelat mangan hidroksida. Endapan beroksigen tersebut kemudian dilarutkan kembali dengan penambahan asam sulfat pekat (H2SO4) untuk membebaskan iodium murni secara ekivalen yang ditandai oleh perubahan warna, yang mana jumlah iodium bebas tersebut segera dititrasi menggunakan larutan baku sekunder Natrium Thiosulfat (Na2S2O3) dengan indikator amilum cair hingga warna biru gelap menghilang secara konstan.
@@ -637,7 +620,20 @@ else:
         st.markdown(f"<p class='section-title'>📊 Rekam Data Kualitas Air Akun: {current_user}</p>", unsafe_allow_html=True)
         st.markdown("---")
         if logs_saat_ini:
-            st.table(logs_saat_ini)
+            # MEMBUAT DATASET BARU UNTUK TAMPILAN TABEL AGAR BINER DITERJEMAHKAN KE DESIMAL
+            logs_tampilan = []
+            for d in logs_saat_ini:
+                logs_tampilan.append({
+                    "No (Desimal)": biner_ke_desimal(d["id_biner"]),
+                    "Kode Biner": d["id_biner"],
+                    "Sampel / Lokasi": d["sampel"],
+                    "Parameter Uji": d["parameter"],
+                    "Nilai (mg/L)": f"{d['nilai']:.4f}",
+                    "Status Regulasi": d["status"],
+                    "Metadata Form": d["keterangan"]
+                })
+            
+            st.table(logs_tampilan)
             st.markdown("---")
             if st.button("🗑️ Kosongkan Riwayat Akun Saya", use_container_width=True):
                 clear_water_logs(current_user)
