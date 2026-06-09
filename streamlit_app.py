@@ -6,12 +6,13 @@ import os
 import hashlib
 
 # ==============================================================================
-# PROYEK: WATER QUALITY ANALYTICS SYSTEM (MULTI-USER SECURITY EDITION)
+# PROYEK: WATER QUALITY ANALYTICS SYSTEM (MULTI-USER SECURITY EDITION - REVISED)
 # ==============================================================================
 
 st.set_page_config(page_title="Water Quality Analytics System", page_icon="💧", layout="wide")
 
-DB_FILE = "isis_water_quality.db"
+# MENGUBAH NAMA FILE DATABASE UNTUK MERESET SKEMA DAN MENGATASI OPERATIONALERROR
+DB_FILE = "isis_water_quality_v3.db"
 
 # ==============================================================================
 # 🔒 FUNGSI KEAMANAN & ENKRIPSI PASSWORD
@@ -25,7 +26,7 @@ def check_hashes(password, hashed_text):
     return False
 
 # ==============================================================================
-# 🖼️ FUNGSI ENKROPSI GAMBAR BACKGROUND KE BASE64
+# 🖼️ FUNGSI ENKRIPSI GAMBAR BACKGROUND KE BASE64
 # ==============================================================================
 def get_base64_image(image_path):
     if os.path.exists(image_path):
@@ -47,7 +48,7 @@ def init_db():
             username TEXT PRIMARY KEY, password TEXT
         )
     """)
-    # Tabel Log Air (Sekarang diikat dengan kolom 'username')
+    # Tabel Log Air (Sudah mengikat kolom 'username')
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS water_log (
             username TEXT, id_biner TEXT, sampel TEXT, parameter TEXT, nilai REAL, status TEXT, keterangan TEXT
@@ -66,7 +67,7 @@ def init_db():
             ("bod", "BOD (Biochemical Oxygen Demand) merupakan takaran jumlah oksigen terlarut yang diperlukan oleh mikroorganisme untuk mendekomposisi bahan organik dalam air selama 5 hari."),
             ("cod", "COD (Chemical Oxygen Demand) adalah jumlah total oksigen yang dibutuhkan untuk mengurai seluruh bahan organik melalui reaksi kimia menggunakan oksidator kuat."),
             ("tss", "TSS (Total Suspended Solids) adalah material padatan tersuspensi (diameter > 1 mikrometer) yang tertahan pada media penyaring seperti kertas saring Whatman 41 setelah dikeringkan pada suhu 103-105°C."),
-            ("do", "DO (Dissolved Oxygen) atau oksigen terlarut menunjukkan volume gas oksigen yang terkandung i dalam air. Kadar DO yang tinggi menandakan kualitas air yang baik untuk kehidupan akuatik."),
+            ("do", "DO (Dissolved Oxygen) atau oksigen terlarut menunjukkan volume gas oksigen yang terkandung di dalam air. Kadar DO yang tinggi menandakan kualitas air yang baik untuk kehidupan akuatik."),
             ("regulasi", "Baku mutu air nasional diatur dalam PP No. 22 Tahun 2021. Batas parameter sangat bergantung pada kelas peruntukan air sungai atau badan air.")
         ]
         cursor.executemany("INSERT OR IGNORE INTO ai_knowledge VALUES (?, ?)", knowledge_awal)
@@ -368,7 +369,7 @@ else:
         
         pilih_fitur = st.radio(
             "📌 Pilih Fitur Utama:",
-            ["Beranda", "Perhitungan BOD", "Perhitungan COD", "Perhitungan TSS", "Perhitungan DO", "Database Riwayat Sampel", "Inteligensia & Konsultasi AI"]
+            ["Beranda", "Perhitungan BOD", "Perhitungan COD", "Perhitungan TSS", "Perhitungan DO", "Database Riwayat Sampel", "Inteligensia &amp; Konsultasi AI"]
         )
         st.markdown("---")
         
@@ -411,7 +412,7 @@ else:
             do_5 = st.number_input("Kadar DO Hari Ke-5 (DO5) (mg/L):", value=4.5000, format="%.4f")
             f_pengenceran = st.number_input("Faktor Pengenceran (P):", value=2.0, step=0.5)
             
-            if st.button("🔥 Hitung & Simpan Data BOD", use_container_width=True):
+            if st.button("🔥 Hitung &amp; Simpan Data BOD", use_container_width=True):
                 hasil = hitung_bod(do_0, do_5, f_pengenceran)
                 status = "MEMENUHI SYARAT" if hasil <= bod_max else "MELEBIHI AMBANG"
                 biner_id = desimal_ke_biner(len(get_water_logs(current_user)) + 1)
@@ -424,7 +425,7 @@ else:
                 st.rerun()
 
         with col_l2:
-            st.markdown("<h3 style='color: #38bdf8;'>🧐 Hasil & Rincian Logika Perhitungan</h3>", unsafe_allow_html=True)
+            st.markdown("<h3 style='color: #38bdf8;'>🧐 Hasil &amp; Rincian Logika Perhitungan</h3>", unsafe_allow_html=True)
             if "pembahasan_bod" in st.session_state:
                 if st.session_state["status_bod"] == "MEMENUHI SYARAT":
                     st.success(f"🎉 HASIL: {st.session_state['nilai_bod']:.4f} mg/L ({st.session_state['status_bod']})")
@@ -449,7 +450,7 @@ else:
             n_fas = st.number_input("Normalitas Larutan FAS (N):", value=0.1000, format="%.4f")
             vol_air = st.number_input("Volume Sampel Air Teruji (mL):", value=50.00, format="%.2f")
             
-            if st.button("🔥 Hitung & Simpan Data COD", use_container_width=True):
+            if st.button("🔥 Hitung &amp; Simpan Data COD", use_container_width=True):
                 hasil = hitung_cod(v_blanko, v_sampel, n_fas, vol_air)
                 status = "MEMENUHI SYARAT" if hasil <= cod_max else "MELEBIHI AMBANG"
                 biner_id = desimal_ke_biner(len(get_water_logs(current_user)) + 1)
@@ -462,7 +463,7 @@ else:
                 st.rerun()
 
         with col_l2:
-            st.markdown("<h3 style='color: #38bdf8;'>🧐 Hasil & Rincian Logika Perhitungan</h3>", unsafe_allow_html=True)
+            st.markdown("<h3 style='color: #38bdf8;'>🧐 Hasil &amp; Rincian Logika Perhitungan</h3>", unsafe_allow_html=True)
             if "pembahasan_cod" in st.session_state:
                 if st.session_state["status_cod"] == "MEMENUHI SYARAT":
                     st.success(f"🎉 HASIL: {st.session_state['nilai_cod']:.4f} mg/L ({st.session_state['status_cod']})")
@@ -486,7 +487,7 @@ else:
             b_akhir = st.number_input("Berat Kertas Saring + Padatan Kering (gram):", value=1.2455, format="%.4f")
             v_air_tss = st.number_input("Volume Sampel Air yang Disaring (mL):", value=100.00, format="%.2f")
             
-            if st.button("🔥 Hitung & Simpan Data TSS", use_container_width=True):
+            if st.button("🔥 Hitung &amp; Simpan Data TSS", use_container_width=True):
                 hasil = hitung_tss(b_akhir, b_awal, v_air_tss)
                 status = "MEMENUHI SYARAT" if hasil <= tss_max else "MELEBIHI AMBANG"
                 biner_id = desimal_ke_biner(len(get_water_logs(current_user)) + 1)
@@ -499,7 +500,7 @@ else:
                 st.rerun()
 
         with col_n2:
-            st.markdown("<h3 style='color: #38bdf8;'>🧐 Hasil & Rincian Logika Perhitungan</h3>", unsafe_allow_html=True)
+            st.markdown("<h3 style='color: #38bdf8;'>🧐 Hasil &amp; Rincian Logika Perhitungan</h3>", unsafe_allow_html=True)
             if "pembahasan_tss" in st.session_state:
                 if st.session_state["status_tss"] == "MEMENUHI SYARAT":
                     st.success(f"🎉 HASIL: {st.session_state['nilai_tss']:.4f} mg/L ({st.session_state['status_tss']})")
@@ -523,7 +524,7 @@ else:
             n_thio = st.number_input("Normalitas Larutan Thiosulfat (N):", value=0.0250, format="%.4f")
             v_botol = st.number_input("Volume Botol DO yang Digunakan (mL):", value=250.00, format="%.2f")
             
-            if st.button("🔥 Hitung & Simpan Data DO", use_container_width=True):
+            if st.button("🔥 Hitung &amp; Simpan Data DO", use_container_width=True):
                 hasil = hitung_do(v_thio, n_thio, v_botol)
                 status = "MEMENUHI SYARAT" if hasil >= do_min else "DI BAWAH MINIMUM"
                 biner_id = desimal_ke_biner(len(get_water_logs(current_user)) + 1)
@@ -536,7 +537,7 @@ else:
                 st.rerun()
 
         with col_n2:
-            st.markdown("<h3 style='color: #38bdf8;'>🧐 Hasil & Rincian Logika Perhitungan</h3>", unsafe_allow_html=True)
+            st.markdown("<h3 style='color: #38bdf8;'>🧐 Hasil &amp; Rincian Logika Perhitungan</h3>", unsafe_allow_html=True)
             if "pembahasan_do" in st.session_state:
                 if st.session_state["status_do"] == "MEMENUHI SYARAT":
                     st.success(f"🎉 HASIL: {st.session_state['nilai_do']:.4f} mg/L ({st.session_state['status_do']})")
@@ -561,8 +562,8 @@ else:
             st.info("Belum ada riwayat pengujian sampel air yang tersimpan di akun Anda.")
 
     # 🧠 INTELIGENSIA & KONSULTASI AI
-    elif pilih_fitur == "Inteligensia & Konsultasi AI":
-        st.markdown("<h1 style='color: #38bdf8;'>🧠 Pusat Kendali Pengetahuan & Konsultasi AI</h1>", unsafe_allow_html=True)
+    elif pilih_fitur == "Inteligensia &amp; Konsultasi AI":
+        st.markdown("<h1 style='color: #38bdf8;'>🧠 Pusat Kendali Pengetahuan &amp; Konsultasi AI</h1>", unsafe_allow_html=True)
         st.markdown("---")
         col_a1, col_a2 = st.columns(2)
         with col_a1:
