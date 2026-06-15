@@ -6,7 +6,7 @@ import os
 import hashlib
 
 # ==============================================================================
-# PROYEK: WATER QUALITY ANALYTICS SYSTEM (BIG TITLE, THEORY & DECIMAL ID EDITION)
+# PROYEK: WATER QUALITY ANALYTICS SYSTEM (GROUP IDENTITY EDITION)
 # ==============================================================================
 
 st.set_page_config(page_title="Water Quality Analytics System", page_icon="💧", layout="wide")
@@ -64,7 +64,7 @@ def init_db():
     cursor.execute("SELECT COUNT(*) FROM ai_knowledge")
     if cursor.fetchone()[0] == 0:
         knowledge_awal = [
-            ("bod", "BOD (Biochemical Oxygen Demand) merupakan takaran jumlah oksigen terlarut yang diperlukan oleh mikroorganisme untuk mendekomposisi bahan organik dalam air selama 5 days."),
+            ("bod", "BOD (Biochemical Oxygen Demand) merupakan takaran jumlah oksigen terlarut yang diperlukan oleh mikroorganisme untuk mendekomposisi bahan organik dalam air selama 5 hari."),
             ("cod", "COD (Chemical Oxygen Demand) adalah jumlah total oksigen yang dibutuhkan untuk mengurai seluruh bahan organik melalui reaksi kimia menggunakan oksidator kuat."),
             ("tss", "TSS (Total Suspended Solids) adalah material padatan tersuspensi (diameter > 1 mikrometer) yang tertahan pada media penyaring seperti kertas saring Whatman 41 setelah dikeringkan pada suhu 103-105°C."),
             ("do", "DO (Dissolved Oxygen) atau oksigen terlarut menunjukkan volume gas oksigen yang terkandung di dalam air. Kadar DO yang tinggi menandakan kualitas air yang baik untuk kehidupan akuatik."),
@@ -233,7 +233,7 @@ def ai_chatbot_brain(username, pertanyaan):
         if reject > 0:
             respons += f"Tapi awas nih, ada **{reject} sampel yang bermasalah (merah)**. Butuh perhatian ekstra di lingkungan ujinya ya!"
         else:
-            respons += "Aman jaya! Sejauh ini belum ada sampel di akunmu yang menyalahi ambang batas regulasi lingkungan."
+            respons += "Aman jaya! Sejauh ini belum ada sampel di akunmu yang menyahi ambang batas regulasi lingkungan."
             
         return respons
         
@@ -263,7 +263,6 @@ st.markdown(f"""
         border-right: 1px solid rgba(51, 65, 85, 0.5);
     }}
     
-    /* 🚨 REVISI UKURAN: JUDUL UTAMA DAN SUB-JUDUL DIPERBESAR ELEGAN */
     .main-title {{
         font-size: 54px !important; 
         font-weight: 800;
@@ -277,6 +276,34 @@ st.markdown(f"""
         color: #94a3b8 !important;
         font-weight: 500;
         margin-bottom: 25px;
+    }}
+    
+    /* 👥 CUSTOM STYLING UNTUK KOTAK DATA KELOMPOK UJI */
+    .group-box {{
+        background: rgba(30, 41, 59, 0.6);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(56, 189, 248, 0.4);
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+    }}
+    .group-title {{
+        font-size: 22px !important;
+        font-weight: 700;
+        color: #38bdf8 !important;
+        margin-bottom: 12px;
+        border-bottom: 1px dashed rgba(56, 189, 248, 0.3);
+        padding-bottom: 5px;
+    }}
+    .member-item {{
+        font-size: 16px !important;
+        color: #f1f5f9 !important;
+        line-height: 1.6;
+    }}
+    .member-nim {{
+        color: #38bdf8 !important;
+        font-family: 'Courier New', Courier, monospace;
+        font-weight: bold;
     }}
     
     .section-title {{
@@ -393,6 +420,18 @@ else:
         st.markdown("<p class='main-title'>💧 Water Quality Analytics System</p>", unsafe_allow_html=True)
         st.markdown(f"<p class='sub-caption'>Dashboard Terenkripsi Keamanan — Selamat Bekerja, Laboran {current_user}</p>", unsafe_allow_html=True)
         st.markdown("---")
+        
+        # 👥 MENAMPILKAN DATA IDENTITAS ANGGOTA KELOMPOK 3
+        st.markdown("""
+        <div class="group-box">
+            <div class="group-title">👥 Tim Pengembang: Kelompok 3</div>
+            <div class="member-item">1. Azmi Rahmandira <span class="member-nim">(2560594)</span></div>
+            <div class="member-item">2. Kanaya Haury Nisa <span class="member-nim">(2560652)</span></div>
+            <div class="member-item">3. Maulida Shifa Ashila <span class="member-nim">(2560667)</span></div>
+            <div class="member-item">4. Najmah Sandi Kiyaasah <span class="member-nim">(2560707)</span></div>
+            <div class="member-item">5. Wilda Rahmah Afiqah <span class="member-nim">(2560801)</span></div>
+        </div>
+        """, unsafe_allow_html=True)
         
         st.markdown("### 📘 Manfaat Utama Aplikasi")
         st.markdown("""
